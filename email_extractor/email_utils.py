@@ -21,56 +21,96 @@ class Email:
     attachments: list = field(default_factory=list)
 
 
+# ── Pre-compiled regexes for HTML-to-text and email parsing ──────────────────
+_HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
+_HTML_ANCHOR_RE = re.compile(
+    r'<a\s[^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)</a>',
+    re.DOTALL | re.IGNORECASE)
+_HTML_SCRIPT_RE = re.compile(r"<script.*?</script>", re.DOTALL | re.IGNORECASE)
+_HTML_STYLE_RE = re.compile(r"<style.*?</style>", re.DOTALL | re.IGNORECASE)
+_HTML_BR_RE = re.compile(r"<br\s*/?>", re.IGNORECASE)
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+_HTML_WS_RE = re.compile(r"[ \t]+")
+_HTML_BLANK_RE = re.compile(r"\n{3,}")
+_FROM_ENVELOPE_RE = re.compile(r'[<\[]([^@\]]+@\S+)[>\]\s]*$')
+_BRACKET_TAG_RE = re.compile(r'<[^>]*>')
+_AT_NONSPACE_RE = re.compile(r"@\S")
+
+
 def _html_to_text(html_text: str) -> str:
     """Strip HTML tags crudely; spaCy/Markdown not required for this build."""
-    text = re.sub(r"<!--.*?-->", "", html_text, flags=re.DOTALL)
-    # Preserve anchor URLs before stripping tags so links survive as text.
-    text = re.sub(
-        r'<a\s[^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)</a>',
-        r"\2 (\1)",
-        text, flags=re.DOTALL | re.IGNORECASE)
-    text = re.sub(r"<script.*?</script>", "", text, flags=re.DOTALL | re.IGNORECASE)
-    text = re.sub(r"<style.*?</style>", "", text, flags=re.DOTALL | re.IGNORECASE)
-    text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
-    text = re.sub(r"<[^>]+>", " ", text)
+    text = _HTML_COMMENT_RE.sub("", html_text)
+    # Preserve anchor link text + URL before stripping tags so links survive
+    # as "text (URL)" in the plaintext output.
+    text = _HTML_ANCHOR_RE.sub(r"\2 (\1)", text)
+    text = _HTML_SCRIPT_RE.sub("", text)
+    text = _HTML_STYLE_RE.sub("", text)
+    text = _HTML_BR_RE.sub("\n", text)
+    text = _HTML_TAG_RE.sub(" ", text)
     text = html.unescape(text)
-    text = re.sub(r"[ \t]+", " ", text)
-    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = _HTML_WS_RE.sub(" ", text)
+    text = _HTML_BLANK_RE.sub("\n\n", text)
     return text.strip()
 
 
 def _extract_body(message) -> str:
-    """Return the best plain-text body from a parsed message object."""
-    if message.is_multipart():
-        parts_priority = ("plain", "html", "text")
-        for subtype in parts_priority:
-            for part in message.walk():
-                ctype = part.get_content_type()
-                if ctype == f"text/{subtype}" and not part.get_filename():
-                    payload = part.get_payload(decode=True)
-                    if payload:
-                        text = payload.decode(part.get_content_charset() or "utf-8",
-                                                errors="replace")
-                        if subtype == "html":
-                            return _html_to_text(text)
-                        return text
-        # fallback: first text-ish part
-        for part in message.walk():
-            payload = part.get_payload(decode=True)
-            if payload:
-                text = payload.decode(part.get_content_charset() or "utf-8",
-                                        errors="replace")
-                if part.get_content_type() == "text/html":
-                    return _html_to_text(text)
-                return text
-        return ""
-    payload = message.get_payload(decode=True)
-    if not payload:
-        return str(message.get_payload() or "")
-    text = payload.decode(message.get_content_charset() or "utf-8", errors="replace")
-    if message.get_content_type() == "text/html":
-        text = _html_to_text(text)
-    return text
+    """Return the best plain-text body from a parsed message object.
+
+    Walks the MIME tree **once**, collecting text parts by content-type
+    priority (plain > html > other text/*), then returns the best candidate.
+    Falls back to the first decodable part if no suitable text part exists.
+    """
+    if not message.is_multipart():
+        payload = message.get_payload(decode=True)
+        if not payload:
+            return str(message.get_payload() or "")
+        text = payload.decode(message.get_content_charset() or "utf-8",
+                              errors="replace")
+        if message.get_content_type() == "text/html":
+            text = _html_to_text(text)
+        return text
+
+    best_plain = None
+    best_html = None
+    best_other = None
+    fallback_part = None
+    for part in message.walk():
+        payload = part.get_payload(decode=True)
+        if not payload:
+            continue
+        if fallback_part is None:
+            fallback_part = part
+        if part.get_filename():
+            continue
+        text = payload.decode(part.get_content_charset() or "utf-8",
+                              errors="replace")
+        ctype = part.get_content_type()
+        if ctype == "text/plain" and best_plain is None:
+            best_plain = text
+        elif ctype == "text/html" and best_html is None:
+            best_html = text
+        elif ctype.startswith("text/") and best_other is None:
+            best_other = text
+        if best_plain is not None:
+            break  # highest priority — no need to keep walking
+
+    if best_plain is not None:
+        return best_plain
+    if best_html is not None:
+        return _html_to_text(best_html)
+    if best_other is not None:
+        return best_other
+
+    # Fallback: first part with a payload (any content type).
+    if fallback_part is not None:
+        payload = fallback_part.get_payload(decode=True)
+        if payload:
+            text = payload.decode(fallback_part.get_content_charset() or "utf-8",
+                                  errors="replace")
+            if fallback_part.get_content_type() == "text/html":
+                text = _html_to_text(text)
+            return text
+    return ""
 
 
 def _extract_attachments(message) -> list[dict]:
@@ -162,10 +202,10 @@ def name_from_from_header(from_header: str) -> str | None:
     if name:
         return name
     # Fall back to manual extraction.
-    m = re.search(r'[<\[]([^@\]]+@\S+)[>\]\s]*$', from_header)
+    m = _FROM_ENVELOPE_RE.search(from_header)
     if m:
         from_header = from_header.replace(m.group(0), "")
-    cleaned = re.sub(r'<[^>]*>', '', from_header).strip().strip('"').strip()
+    cleaned = _BRACKET_TAG_RE.sub('', from_header).strip().strip('"').strip()
     return cleaned or None
 
 
@@ -188,7 +228,7 @@ def extract_forwarded_sender(body: str) -> str | None:
     for match in _FORWARDED_FROM_RE.finditer(body):
         value = match.group(1).strip()
         # Treat it as an envelope only if it carries an email address.
-        if re.search(r"@\S", value):
+        if _AT_NONSPACE_RE.search(value):
             return value
     return None
 

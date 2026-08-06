@@ -72,7 +72,7 @@ def _is_proxy_sender(from_name: str, signoff_name: str | None, body: str) -> boo
     return from_name not in body
 
 
-def extract_name(from_header: str, body: str) -> str | None:
+def extract_name(from_header: str, body: str, signoff_name: str | None = None) -> str | None:
     """Determine the candidate's full name.
 
     Strategy:
@@ -86,7 +86,8 @@ def extract_name(from_header: str, body: str) -> str | None:
     from_name = name_from_from_header(from_header)
     if from_name and "@" not in from_name:
         from_name = _trim_title_from_name(from_name)
-        signoff_name = _find_signoff_name(body)
+        if signoff_name is None:
+            signoff_name = _find_signoff_name(body)
         if len(from_name.split()) >= 2:
             # A 2+ token From name wins outright, unless it's a proxy/forwarder.
             if _is_proxy_sender(from_name, signoff_name, body) and signoff_name:
@@ -98,7 +99,8 @@ def extract_name(from_header: str, body: str) -> str | None:
         return from_name
 
     # 2. Closing sign-off in the body.
-    signoff_name = _find_signoff_name(body)
+    if signoff_name is None:
+        signoff_name = _find_signoff_name(body)
     if signoff_name:
         return signoff_name
 
@@ -122,7 +124,7 @@ def extract_name(from_header: str, body: str) -> str | None:
     return None
 
 
-def extract_email(from_header: str, body: str) -> str | None:
+def extract_email(from_header: str, body: str, signoff_name: str | None = None) -> str | None:
     """Extract the candidate's primary email address.
 
     The From header is preferred — unless it belongs to a proxy/forwarder
@@ -132,7 +134,8 @@ def extract_email(from_header: str, body: str) -> str | None:
     """
     from_name = name_from_from_header(from_header)
     if from_name and "@" not in from_name:
-        signoff_name = _find_signoff_name(body)
+        if signoff_name is None:
+            signoff_name = _find_signoff_name(body)
         if not _is_proxy_sender(from_name, signoff_name, body):
             m = config.EMAIL_REGEX.search(from_header)
             if m:
@@ -170,7 +173,7 @@ def extract_phones(body: str) -> list[str]:
     for match in config.PHONE_REGEX.finditer(body):
         raw = match.group(0)
         # Require a minimum digit count so years/short numbers are rejected.
-        digits = re.sub(r"\D", "", raw)
+        digits = config.DIGITS_ONLY.sub("", raw)
         if len(digits) < 7:
             continue
         normalised = _format_phone(raw)
@@ -196,7 +199,7 @@ def _format_phone(raw: str) -> str:
 
 def _normalise_phone(raw: str) -> str:
     """Normalise a phone string to a canonical ``+<country><digits>`` form."""
-    digits = re.sub(r"\D", "", raw)
+    digits = config.DIGITS_ONLY.sub("", raw)
     has_plus = raw.lstrip().startswith("+") or "+00" in raw
     if not digits:
         return ""
@@ -298,10 +301,11 @@ def extract_notice_period(body: str) -> str | None:
     return None
 
 
-def _extract_keywords(body: str, keywords: list[str], limit: int = 10) -> list[str]:
+def _extract_keywords(body: str, compiled_keywords: list[tuple[re.Pattern, str]],
+                      limit: int = 10) -> list[str]:
     """Return canonical keyword hits in ``body`` in source order.
 
-    ``keywords`` must be ordered longest-first (as produced by
+    ``compiled_keywords`` must be ordered longest-first (as produced by
     :func:`config._dedupe_keyword_list`) so multi-word phrases are consumed
     before any shorter sub-token they contain.  Matched spans are blanked in a
     working copy (length-preserving) so a keyword such as "SQL" is not also
@@ -318,15 +322,10 @@ def _extract_keywords(body: str, keywords: list[str], limit: int = 10) -> list[s
     found: list[tuple[int, str]] = []
     seen: set[str] = set()
     buf = body
-    for kw in keywords:
-        pattern = re.compile(
-            r"(?<![A-Za-z0-9])" + re.escape(kw) + r"(?![A-Za-z0-9])",
-            re.IGNORECASE,
-        )
+    for pattern, canon in compiled_keywords:
         match = pattern.search(buf)
         if not match:
             continue
-        canon = kw
         if canon.lower() not in seen:
             seen.add(canon.lower())
             found.append((match.start(), canon))
@@ -340,20 +339,20 @@ def extract_skills(body: str) -> list[str]:
     """Return technical skills / technologies mentioned in ``body``."""
     if not body:
         return []
-    return _extract_keywords(body, config.SKILLS, limit=15)
+    return _extract_keywords(body, config.COMPILED_SKILLS, limit=15)
 
 
 def extract_education(body: str) -> list[str]:
     """Return education-level keywords mentioned in ``body``."""
     if not body:
         return []
-    return _extract_keywords(body, config.EDUCATION, limit=5)
+    return _extract_keywords(body, config.COMPILED_EDUCATION, limit=5)
 
 
 def extract_seniority(body: str) -> str | None:
     """Return the first seniority-level keyword found in ``body``, or None."""
-    for kw in config.SENIORITY:
-        if re.search(r"\b" + re.escape(kw) + r"\b", body, re.IGNORECASE):
+    for pattern, kw in config.COMPILED_SENIORITY:
+        if pattern.search(body):
             return kw
     return None
 
@@ -397,8 +396,8 @@ def extract_location(body: str) -> str | None:
             if loc:
                 return loc
     # Fallback: a recognised country name anywhere in the body.
-    for country in sorted(config.COUNTRIES, key=len, reverse=True):
-        if re.search(r"\b" + re.escape(country) + r"\b", body, re.IGNORECASE):
+    for pattern, country in config.COMPILED_COUNTRIES:
+        if pattern.search(body):
             return country
     return None
 
@@ -445,21 +444,22 @@ def extract_languages(body: str) -> list[str]:
     """Return languages mentioned in ``body`` in source order (de-duplicated)."""
     if not body:
         return []
-    return _extract_keywords(body, config.LANGUAGES, limit=10)
+    return _extract_keywords(body, config.COMPILED_LANGUAGES, limit=10)
 
 
 def extract_certifications(body: str) -> list[str]:
     """Return professional certifications mentioned in ``body`` in source order."""
     if not body:
         return []
-    return _extract_keywords(body, config.CERTIFICATIONS, limit=15)
+    return _extract_keywords(body, config.COMPILED_CERTIFICATIONS, limit=15)
 
 
 def extract_candidate(from_header: str, body: str) -> dict:
     """Assemble the full ``candidate`` sub-document."""
+    signoff_name = _find_signoff_name(body)
     return {
-        "name": extract_name(from_header, body),
-        "email": extract_email(from_header, body),
+        "name": extract_name(from_header, body, signoff_name),
+        "email": extract_email(from_header, body, signoff_name),
         "phone": extract_phones(body),
         "links": extract_links(body),
         "years_of_experience": extract_years_of_experience(body),

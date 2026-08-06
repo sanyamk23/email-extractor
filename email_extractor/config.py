@@ -51,6 +51,13 @@ BONUS_EXPERIENCE = 0.05
 BONUS_NOTICE_PERIOD = 0.05  # mentioning a notice period signals an application
 
 
+# Pre-compiled patterns reused by the classifier structural bonuses.
+RESUME_CV_REGEX: re.Pattern = re.compile(r"\b(?:resume|cv)\b", re.IGNORECASE)
+SIGNOFF_REGEX: re.Pattern = re.compile(
+    r"(?:Sincerely|Best\s+regards|Thanks|Thank\s+you|Regards|Cheers)"
+    r"\s*,?\s*\n", re.IGNORECASE)
+
+
 def _compile_triggers() -> list[dict]:
     compiled: list[dict] = []
     for pattern, weight, scope in APPLICATION_TRIGGERS:
@@ -313,6 +320,11 @@ ROLE_DICTIONARY: list[str] = [
 # Lower-cased lookup preserving the canonical capitalisation.
 ROLE_CANONICAL: dict[str, str] = {role.lower(): role for role in ROLE_DICTIONARY}
 
+# Role dictionary pre-sorted longest-first so multi-word roles win during
+# substring matching (replaces the per-call ``sorted()`` in _match_dictionary).
+SORTED_ROLE_DICTIONARY: list[str] = sorted(
+    ROLE_DICTIONARY, key=len, reverse=True)
+
 
 # ---------------------------------------------------------------------------
 # 3. Candidate name extraction — sign-off patterns
@@ -374,6 +386,10 @@ PHONE_REGEX: re.Pattern = re.compile(
     \d{3,4}[\s.-]?\d{3,4}           # main 7-digit block
     (?:[\s./]*(?:ext\.?|x|\#)\s*\d+)? # optional extension
     ''')
+
+
+# Reusable: strip all non-digit characters (phone normalisation).
+DIGITS_ONLY: re.Pattern = re.compile(r"\D")
 
 LINKEDIN_REGEX: re.Pattern = re.compile(
     r"https?://(?:www\.|ca\.)?linkedin\.com/[^\s,)<>]+", re.IGNORECASE)
@@ -562,6 +578,13 @@ SENIORITY: list[str] = _dedupe_keyword_list([
     "Mid", "Mid-level", "Senior", "Lead", "Principal", "Staff",
 ])
 
+# Pre-compiled seniority patterns (word-boundary \b, not lookahead/lookbehind,
+# to match the original extract_seniority behaviour).
+COMPILED_SENIORITY: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"\b" + re.escape(kw) + r"\b", re.IGNORECASE), kw)
+    for kw in SENIORITY
+]
+
 
 # Recognised countries (canonical title-case form) used to validate / surface a
 # location when only the country name appears in the text.
@@ -601,6 +624,16 @@ COUNTRIES: list[str] = [
     "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
 ]
 COUNTRY_LOOKUP: dict[str, str] = {c.lower(): c for c in COUNTRIES}
+
+# Countries pre-sorted longest-first so multi-word names are matched before
+# single-word ones (replaces the per-call ``sorted()`` in extract_location).
+SORTED_COUNTRIES: list[str] = sorted(COUNTRIES, key=len, reverse=True)
+
+# Pre-compiled country patterns for the location fallback search.
+COMPILED_COUNTRIES: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"\b" + re.escape(c) + r"\b", re.IGNORECASE), c)
+    for c in SORTED_COUNTRIES
+]
 
 
 # Structural location phrases. Kept conservative: only explicit location
@@ -682,4 +715,24 @@ CERTIFICATIONS: list[str] = _dedupe_keyword_list([
     "Google Ads Certified", "Salesforce Certified", "Scrum Master", "CSM",
     "Six Sigma", "ITIL", "Oracle Certified",
 ])
+
+
+# ── Pre-compiled keyword pattern lists ─────────────────────────────────────────
+# Each entry is (compiled_regex, canonical_keyword).  Pre-compiled once at import
+# time so the extraction layer never pays re.compile() per keyword per email.
+# The lookarounds use (?<![A-Za-z0-9])…(?![A-Za-z0-9]) instead of \b so that
+# punctuation-bearing tokens like "C++", "C#", "CI/CD", "Node.js" match and
+# so that "SQL" is not found inside "MySQL".
+def _compile_keywords(keywords: list[str]) -> list[tuple[re.Pattern, str]]:
+    return [
+        (re.compile(r"(?<![A-Za-z0-9])" + re.escape(kw) + r"(?![A-Za-z0-9])",
+                     re.IGNORECASE), kw)
+        for kw in keywords
+    ]
+
+
+COMPILED_SKILLS: list[tuple[re.Pattern, str]] = _compile_keywords(SKILLS)
+COMPILED_EDUCATION: list[tuple[re.Pattern, str]] = _compile_keywords(EDUCATION)
+COMPILED_LANGUAGES: list[tuple[re.Pattern, str]] = _compile_keywords(LANGUAGES)
+COMPILED_CERTIFICATIONS: list[tuple[re.Pattern, str]] = _compile_keywords(CERTIFICATIONS)
 

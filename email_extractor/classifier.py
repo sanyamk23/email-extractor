@@ -12,8 +12,6 @@ application when it meets ``CLASSIFICATION_THRESHOLD``.
 """
 from __future__ import annotations
 
-import re
-
 from . import config
 
 
@@ -39,10 +37,9 @@ def classify(subject: str, body: str) -> tuple[bool, float]:
 
     # Structural bonuses — these raise confidence for legit applications and
     # help push borderline cases over the threshold.
-    if re.search(r"\b(?:resume|cv)\b", body, re.IGNORECASE):
+    if config.RESUME_CV_REGEX.search(body):
         confidence += config.BONUS_RESUME_MENTION
-    if re.search(r"(?:Sincerely|Best\s+regards|Thanks|Thank\s+you|Regards|Cheers)"
-                 r"\s*,?\s*\n", body, re.IGNORECASE):
+    if config.SIGNOFF_REGEX.search(body):
         confidence += config.BONUS_SIGNOFF
     if config.PHONE_REGEX.search(body):
         confidence += config.BONUS_PHONE

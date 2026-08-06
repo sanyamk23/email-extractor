@@ -54,9 +54,7 @@ def _match_dictionary(text: str) -> str | None:
     Roles are tested longest-first so the most specific match wins.
     """
     lowered = text.lower()
-    # Pre-sort by length (longest first) only once — cheap enough per call.
-    sorted_roles = sorted(config.ROLE_DICTIONARY, key=len, reverse=True)
-    for role in sorted_roles:
+    for role in config.SORTED_ROLE_DICTIONARY:
         if role.lower() in lowered:
             return role
     return None

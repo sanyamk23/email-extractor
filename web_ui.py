@@ -21,6 +21,9 @@ from urllib.parse import urlparse
 
 from email_extractor.pipeline import parse_job_application
 
+# 10 MB cap — prevents unbounded reads on the Content-Length header.
+MAX_CONTENT_LENGTH = 10 * 1024 * 1024
+
 
 # --------------------------------------------------------------------------- #
 # Pure helpers (unit-tested directly).
@@ -265,6 +268,10 @@ class _Handler(BaseHTTPRequestHandler):
 
         content_type = self.headers.get("Content-Type", "")
         length = int(self.headers.get("Content-Length", "0") or "0")
+        if length > MAX_CONTENT_LENGTH:
+            self._send_html(build_form_page(
+                f"Upload too large (max {MAX_CONTENT_LENGTH // (1024 * 1024)} MB)."), 413)
+            return
         body = self.rfile.read(length) if length else b""
 
         raw = ""

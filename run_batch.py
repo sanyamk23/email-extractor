@@ -14,7 +14,7 @@ import glob
 import os
 import sys
 
-from email_extractor import parse_job_application
+from email_extractor.pipeline import parse_job_application
 
 
 def _summarise(raw: str) -> dict:
@@ -22,26 +22,33 @@ def _summarise(raw: str) -> dict:
 
 
 def _row(path: str) -> str:
-    with open(path, encoding="utf-8", errors="replace") as fh:
-        r = _summarise(fh.read())
-    c = r["candidate"]
-    phone = (c["phone"] or ["-"])[0]
-    app = "APP" if r["is_job_application"] else "no"
+    try:
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            r = _summarise(fh.read())
+    except Exception as exc:
+        return f"ERROR {path}: {type(exc).__name__}: {exc}\n"
+
+    c = r.get("candidate", {})
+    phone = (c.get("phone") or ["-"])[0]
+    app = "APP" if r.get("is_job_application") else "no"
     s = r.get("sender") or {}
     if s.get("email"):
         sender = f"{s.get('name')} <{s.get('email')}>"
     else:
         sender = s.get("name")
     return (
-        f"{app:3} conf={r['confidence_score']:.2f} role={r['job_role']}\n"
-        f"     name={c['name']} email={c['email']} phone={phone} sender={sender}\n"
-        f"     yoe={c['years_of_experience']} salary={c['salary_expectation']} "
-        f"notice={c['notice_period']}\n"
-        f"     skills={c['skills']} education={c['education']} "
-        f"seniority={c['seniority']} location={c['location']} company={c['company']}\n"
-        f"     start_date={c['start_date']} work_type={c['work_type']} "
-        f"languages={c['languages']} certifications={c['certifications']}\n"
-        f"     links={c['links']}\n"
+        f"{app:3} conf={r.get('confidence_score', 0.0):.2f} "
+        f"role={r.get('job_role')}\n"
+        f"     name={c.get('name')} email={c.get('email')} phone={phone} "
+        f"sender={sender}\n"
+        f"     yoe={c.get('years_of_experience')} salary={c.get('salary_expectation')} "
+        f"notice={c.get('notice_period')}\n"
+        f"     skills={c.get('skills')} education={c.get('education')} "
+        f"seniority={c.get('seniority')} location={c.get('location')} "
+        f"company={c.get('company')}\n"
+        f"     start_date={c.get('start_date')} work_type={c.get('work_type')} "
+        f"languages={c.get('languages')} certifications={c.get('certifications')}\n"
+        f"     links={c.get('links')}\n"
         f"     attachments={len(r.get('attachments') or [])}"
         f" {[a.get('filename', '') for a in r.get('attachments') or []]}\n"
         f"     {path}\n"
