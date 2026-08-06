@@ -1,0 +1,24 @@
+From: "Jane Doe" <jane.doe@example.com>
+To: jobs@example.com
+Subject: Application for Data Analyst Position
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUNDARY123"
+
+--BOUNDARY123
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+
+Hi, this is my application for the Data Analyst position.
+Phone: +1-555-019-9494
+https://github.com/janedoe
+
+Best regards,
+Jane Doe
+--BOUNDARY123
+Content-Type: application/pdf; name="resume.pdf"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="resume.pdf"
+Content-ID: <resume.pdf@localhost>
+
+aGVsbG8gcmVzdW1l
+--BOUNDARY123--

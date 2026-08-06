@@ -1,0 +1,134 @@
+Delivered-To: sanyamkumat@gmail.com
+Received: by 2002:a0c:e9c7:0:b0:8da:e324:b7c0 with SMTP id q7csp5584040qvo;
+        Tue, 4 Aug 2026 12:15:39 -0700 (PDT)
+X-Received: by 2002:a05:622a:4811:b0:51c:22c5:daee with SMTP id d75a77b69052e-52ce6133c6bmr16623591cf.29.1785870938851;
+        Tue, 04 Aug 2026 12:15:38 -0700 (PDT)
+ARC-Seal: i=2; a=rsa-sha256; t=1785870938; cv=pass;
+        d=google.com; s=arc-20260327;
+        b=lGELZTeXl3Hp3UJFe3SPVUAa9HqpYfE7NWzzv1q3LNwA3cH60DKPjw7nrnRq8VpMg8
+         4mkUJSXTsPJtRvCfnMBn2QZeni+7UpoUjjbjTik8/nSe7z4bwrLFMMfJMFrHlMUItgj3
+         JHpsVvS4MVphChr555XefNsVjXX/GAbhyK38y4VPzikOUD2W0Ckc0trUzBq+WuRUmks8
+         qIGQbV3ReHy4dmjBNF5VGVr+TnVbUNwxpd2yQVafFMVFNKfZxY0QoAQcVjJixt078V+2
+         LmdT2dlfQYG8ZxOX3UpYZLLYwSinO+yh20HwCnS1ThdO+qtquPwVlHseTNaEbuRwMxVg
+         GR1Q==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=o/c2kZUxxB2Brz/Mrt2UDO06Arm26gxFd1fxV7IO7mk=;
+        fh=Tx6dviNo0nED3MTuGW74/DJMVpAUrRmua2x/YE6vZt8=;
+        b=bWToTBwt41IsOujafHK0ypvMUTNKAWXYSVa1ETr2TooIexcZSfZDkhDTfCyfgXgZVK
+         dS4J4vHF9MxTr+155Z25Wt6p2r8FiStev3laLMOGXCsVMgKgQCpcx7fRsGsq8QLjNvDK
+         DodzDqBEcAPYeZSrRY9Hz2U6QbSeO9KDpnzO43QaphMBucoMCdkUVmxbVXBYGF98ucTH
+         3wAzkPv89++Kpa0iB2su81RipZMm2AbnF1F9MZ/D0KlcWNSRAcIxsx1/n9w1kvGpBe4u
+         zZh7qdakEho2WjPS1ux7dzzUiG6fg96zqcmnvrZDHZ2xVn7b32Ov2aVV/ffwAyDeOWIF
+         Ngyw==;
+        dara=google.com
+ARC-Authentication-Results: i=2; mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20251104 header.b=G7k2BZE+;
+       arc=pass (i=1);
+       spf=pass (google.com: domain of developer.shaktisingh@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=developer.shaktisingh@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;
+       dara=pass header.i=@gmail.com
+Return-Path: <developer.shaktisingh@gmail.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id d75a77b69052e-52ce53537c8sor3195671cf.9.2026.08.04.12.15.38
+        for <sanyamkumat@gmail.com>
+        (Google Transport Security);
+        Tue, 04 Aug 2026 12:15:38 -0700 (PDT)
+Received-SPF: pass (google.com: domain of developer.shaktisingh@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20251104 header.b=G7k2BZE+;
+       arc=pass (i=1);
+       spf=pass (google.com: domain of developer.shaktisingh@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=developer.shaktisingh@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;
+       dara=pass header.i=@gmail.com
+ARC-Seal: i=1; a=rsa-sha256; t=1785870938; cv=none;
+        d=google.com; s=arc-20260327;
+        b=kphuEGL4k40zlPCYGb8sGShPTVVdbgIFWDXTwL/Ph0IYGI9Re6Wsz/Ev+K+UBtL5yH
+         uXleoZ28+I5vqWX07HklOY7YdKVOedCWYI6kmkA3wYLKN3ffT1Sauf+M700pEnP6HlrQ
+         LkhwtT238mUFjyNxZDuaIg3D6UkiHrtgTqHNpqWcwF9gr+lv9Yg8tK3G6ZkVIhpxWMP1
+         VJP3VmBtfH5azie2zjQGGC3r4JrAFjhKHmk6FQSURb08WasStDEXiW8kaGJusDzNq1KF
+         IJ+y2T7NBpnmxPrWFkmLipMYZh1FrxuRiWQ7k4hBHUqirf/ER5Vrh3QtZrxTVRaoJthD
+         tUXg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=o/c2kZUxxB2Brz/Mrt2UDO06Arm26gxFd1fxV7IO7mk=;
+        fh=Tx6dviNo0nED3MTuGW74/DJMVpAUrRmua2x/YE6vZt8=;
+        b=VY7B57YadzubqMYT+yKsrva/MzW3U4SMNkfhuj/WFuwwqV2Iw6JmDv5VX/kEUX0jpw
+         N3SLaJzktCYubPVrF+ByX3rQQvwH4CJ11WpQgWv/I4EStpHGMMYG7yUAZ9nLHWLNxi+o
+         5cnDxdYUdPddxbKDjcOtp9mMzBgvHYG6axyfCOeyl4/sEtyWHsr2iXQIiNCkSXdPUbTk
+         nuFfKFbA/6pEucW0/7crkdrQs4kXV/yD9n1AUGA6GL9qRafmEkoveDQOXR3R0BXNB64X
+         7RAKERD+v97jICWdef7sYwSwfiD+XGgNNTLr7rMGeOYMsB/K6rZnvU7vyAyF5GytUz29
+         2Fyg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1785870938; x=1786475738; dara=google.com;
+        h=content-type:to:subject:message-id:date:from:mime-version:from:to
+         :cc:subject:date:message-id:reply-to:content-type;
+        bh=o/c2kZUxxB2Brz/Mrt2UDO06Arm26gxFd1fxV7IO7mk=;
+        b=G7k2BZE+76NwplyvdkMu0bv2rrQsc/1ETncOhijhactUlaYSAru1ZvEyVaPvX46wJ2
+         m+ppZG75zYFwZkJlNCdqomkg2UbhwzJhlvk/sjFWjk09p7NRg3OR88R9r/BSq7JE+jrS
+         OuY3LBzEhiJlP7HWBN7tbhZf73UamHVqDRIe58I9iBMae3xbZVF8EnZWAere+TfwZ300
+         l4FZ0mfqfHnaWi4ZJYA9Ce3ZNhFZBALAq4Bs/maxOca7c0WGCjmETg00WbC9Ax+4Ge3a
+         kkNnlMjqDoHZjWR93dmxVtzxtWASsPUscrbM5TvE8x5s9w4IsTCdViuqgenoOnIZXzbD
+         jMSg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785870938; x=1786475738;
+        h=content-type:to:subject:message-id:date:from:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=o/c2kZUxxB2Brz/Mrt2UDO06Arm26gxFd1fxV7IO7mk=;
+        b=BBqRrG48iCenQB3VMByvAop3r6bKzkwOcV3IV0I2wlGevijyMrcCo9T/amL4AyoSQ3
+         CCfN1HveFIs2tuv/Br4UHmqANvO5sC46tobcPWnxE6Z3YI1HJSinFvyQXHXmywnx+F8U
+         UTUWJ0M8/JWyeYlv1VHg6UWXKHVbOhJmT/VJTObRu7t5tJ49xrx/qw5+RGUnPpL48IcC
+         h2/hBJ0rCDmDm6VaNygnyX9Y5FVUk43WdiTD6FfokqtA1jf5Y5Nfzblt8aiM/P6yuFaO
+         nifNGkRF/qJf04PWShxu6nDa4QhuoeBcHSYHeGIcF/7jQHOam47TjFcP6cissplZn/fu
+         /2JA==
+X-Gm-Message-State: AOJu0YxPsQ4XSBx+7+t7J2nmU6t2mRveWAdVy2YNJBvbcCDl66UPYyxg
+	QXAtrYnk0ZG7Q9kwhACq00Lo9AbDz50RrffYq4/M3RX/OKcbtZc+NwHpoy+iOdE5BEiKL3B6gyS
+	OX1r4nrUJ1sbpyB1QSdj1xQE9iTwNMVdgFA==
+X-Gm-Gg: AR+sD11JAzPWSSspL5naDLrPjjYG0lvYvFBbg71FVNfM+VaZ+rdLHbXQDghC/fOzOHK
+	8zQqvn74ZcXUTuACzPoBqKBhPel0jLwHu+2X1GdN84pGOUQ3xnR1tt1Z12TFHx8V9tG6kutO/C1
+	IehF8OPfYjgm927fn5FTfSiV9k+YOAPDH4miJ2BcZIrq0cjkafQ6GytRAyCIvUZ5qx96kQg0FwO
+	vujYbyeWO7pTXE9mI5//APdt6hGDMLWsnrWP1eaNR4Fj+LwDqjt5Hpr2A4IVy4MVC1nN0g1tMXA
+	JXfZlHFwMhPJ0mrEqjDmmYQSoFdA0P61neA5wd+Kq5xbJ61YM1buDMwyI8oLshI4+SfbeHH6XJi
+	CXEetzulx2ApULPGInuekhNXr
+X-Received: by 2002:a05:622a:d5:b0:517:906b:c043 with SMTP id
+ d75a77b69052e-52ce61b53dcmr12425931cf.36.1785870938345; Tue, 04 Aug 2026
+ 12:15:38 -0700 (PDT)
+MIME-Version: 1.0
+From: Shakti Singh <developer.shaktisingh@gmail.com>
+Date: Tue, 4 Aug 2026 15:15:27 -0400
+X-Gm-Features: AUfX_mwXRlVBFtLBi883AXZG63ApATkBrBC35raXz0WHJuRwUhyIdljAnPGpJ2w
+Message-ID: <CAL8un_hODWe+WDGpcJV+G039fNV-12oKthYeR93tf=irMG8q0g@mail.gmail.com>
+Subject: Job Description: Software Engineer at TechNova Inc
+To: sanyamkumat@gmail.com
+Content-Type: multipart/alternative; boundary="000000000000e515c806583d7a6e"
+
+--000000000000e515c806583d7a6e
+Content-Type: text/plain; charset="UTF-8"
+
+Position: Software Engineer
+Company: TechNova Inc
+Location: Remote
+
+We are looking for a Software Engineer to join our growing engineering
+team. Responsibilities include designing scalable backend services, writing
+clean and maintainable code, and collaborating with cross-functional teams.
+
+Requirements: 2+ years of experience with Python or Java, familiarity with
+REST APIs, and a degree in Computer Science or related field.
+
+--000000000000e515c806583d7a6e
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Position: Software Engineer<div>Company: TechNova Inc</div=
+><div>Location: Remote</div><div><br></div><div>We are looking for a Softwa=
+re Engineer to join our growing engineering team. Responsibilities include =
+designing scalable backend services, writing clean and maintainable code, a=
+nd collaborating with cross-functional teams.</div><div><br></div><div>Requ=
+irements: 2+ years of experience with Python or Java, familiarity with REST=
+ APIs, and a degree in Computer Science or related field.</div></div>
+
+--000000000000e515c806583d7a6e--

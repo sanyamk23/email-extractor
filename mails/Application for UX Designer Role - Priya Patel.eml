@@ -1,0 +1,133 @@
+Delivered-To: sanyamkumat@gmail.com
+Received: by 2002:a0c:e9c7:0:b0:8da:e324:b7c0 with SMTP id q7csp5578584qvo;
+        Tue, 4 Aug 2026 12:10:22 -0700 (PDT)
+X-Received: by 2002:a05:622a:2615:b0:51b:fb82:67d1 with SMTP id d75a77b69052e-52ce6112cd9mr15039171cf.20.1785870622447;
+        Tue, 04 Aug 2026 12:10:22 -0700 (PDT)
+ARC-Seal: i=2; a=rsa-sha256; t=1785870622; cv=pass;
+        d=google.com; s=arc-20260327;
+        b=YZESHcxqrdFjflWw/vsFk5arBBHWmuaUnyZ3woaP5/rIFT9lMyMd1eTiDxKWHHpXoV
+         yl19eSOtOOGmTcjyqLQAKCcBxVpG7/g2KCWxpvYjX2f7EjpVYk86bGus1LkhttWtqM89
+         4yNSUuV5AFc0PQcHVFlof3d+yQi29RDR/ADkrS4EbFxjULWUAN0TUbab9YBDyM/jJ2g5
+         QNqG7ejPqYr2lGW37EpR/dGqoUAQlg5GngrG6R8zNRLiDGDKBi9NF6m1v6++g0eBiAVY
+         DtRrZiaDAMJeQaKXBLV6YNb+ZgjQ93WlLVbpb7daE5letXKmH4lqc5oF1yTi3TxS+GD2
+         L47Q==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=RWBnrz4s9CViuW9WGCIUmgJSpitPNjttoCK6MCzBC8E=;
+        fh=Tx6dviNo0nED3MTuGW74/DJMVpAUrRmua2x/YE6vZt8=;
+        b=oNHCce7SFqwW47LhIlKMVi6uMwWn9jPo6URC792jlU3PJvjIJv0/7ypBG83Hk7DMAA
+         ih1xJJIT+eaLHhHUb7Q2BxHmM26OpR55tOziDs5ZMyrGHXLDWiCwg1Q9072bsj66t9wt
+         Pib5le777Vx12UwJ0ibWyRfKrTnU3bzFG0iqZt9zgRJcOXhiR73u3shOBRplzFGoUmya
+         /YWi5tSNzU73go7oxtTGIU/f8rIxvCtJg9HAZ77LyMiG1GsV6wNczOe8cEPXAFdgyqtR
+         QvDzLmYkfqxqTsBfD9Rm7yIgKU/4fPhIaRJCPy1PDGOVLJoZDgs79Xr/X26zE5qLXz7q
+         mrFg==;
+        dara=google.com
+ARC-Authentication-Results: i=2; mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20251104 header.b=r25PdL4W;
+       arc=pass (i=1);
+       spf=pass (google.com: domain of developer.shaktisingh@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=developer.shaktisingh@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;
+       dara=pass header.i=@gmail.com
+Return-Path: <developer.shaktisingh@gmail.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id d75a77b69052e-52ce51c0cf7sor4790901cf.4.2026.08.04.12.10.22
+        for <sanyamkumat@gmail.com>
+        (Google Transport Security);
+        Tue, 04 Aug 2026 12:10:22 -0700 (PDT)
+Received-SPF: pass (google.com: domain of developer.shaktisingh@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20251104 header.b=r25PdL4W;
+       arc=pass (i=1);
+       spf=pass (google.com: domain of developer.shaktisingh@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=developer.shaktisingh@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;
+       dara=pass header.i=@gmail.com
+ARC-Seal: i=1; a=rsa-sha256; t=1785870622; cv=none;
+        d=google.com; s=arc-20260327;
+        b=FFOFvlIa+hF5piwecEOW+l0rjWu0BZVk+N/F6mkAflImOyrYSVMPKpUjDVmq+zpRRB
+         ROiQsfEiI2R5gyakWOPOvUD7WoSkWxbkx61+LBpZuTVuuIfHqUQdujK/3eSrs1cSm2LP
+         /l122beuGGEG7nKw+11SKTl/8Mq21BI2QIgsiIZ0+5QpTVhMNgA5HbXSb1U5TIDtdF/C
+         xM0iBLUujGb+2QS3MLIJ7Auhv4L78LWRkqkQUw4gNWtdddzd0KVMUtPZAHf+g9xDWwul
+         F2RRGG16Zq/gRX2O1pVCNbRqOP3CaloxGY8BCbWojhD7LydxkrCI9fF0d+dek+pfOGKB
+         Hpvw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=RWBnrz4s9CViuW9WGCIUmgJSpitPNjttoCK6MCzBC8E=;
+        fh=Tx6dviNo0nED3MTuGW74/DJMVpAUrRmua2x/YE6vZt8=;
+        b=BG/zVKsPV4yBqhGC3O+rqSZ0PkAIa3+YzLM7+YBRdiaOxyXcfjp08Hy83KZb7zkhRy
+         8VGS/Ws9wEVEx59M2ZLhIIR1RE5Ops50nQ2Zwkvm7EG1PP0aFEEWVyU1LvBI5S8DZjL6
+         uAHndsmKwJNM06ixlNjnbBGczxPHtNblhFSdCNxeWafjFviHJHlQ9+IqUtwRk5Y2MF1J
+         Hevy/IXstkDDXGHYsnpBJPrn6f8/Hz08NHUIGSuN1LJpuJlsGv9cAfv3RUJzjkshhZcv
+         yXczkEpeihR8tM9GeRECxRLlLMkr0Lvq1URPsLGiZbTgfncUv1m+nxZCdHDgZg1QQxu2
+         PVcA==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1785870622; x=1786475422; dara=google.com;
+        h=content-type:to:subject:message-id:date:from:mime-version:from:to
+         :cc:subject:date:message-id:reply-to:content-type;
+        bh=RWBnrz4s9CViuW9WGCIUmgJSpitPNjttoCK6MCzBC8E=;
+        b=r25PdL4We3HKx00vtmvJqStRWyoJoVHXQ6jvuA3Hbq8dpAXpj3JsVOsDKpVD6smckB
+         yTgmKsTtKkPwshYxBYIIxG0Rv6wgOq5pSR8kFnGNWVgCmwzBD0iGMvqPRC7v/ryXryeb
+         j0sQJClxqP006+eAOWqe6BxO2V9Pk1oi7xzyfy7EolBOZ2mBb6WrkVv8fX3/vYbmutqQ
+         vK3wmnjgLgIupQB0ZCPeV7k1gA+pvBb5vMqtrvL4mH+elDAYsr5XW8bUkmzBNQel5RgR
+         WDKUKVcRTOK8jTQMmCdB+mZjW4DxOmdxscjG8hlpQ+BIR+qMeTXeCatjY34rtPICZXTl
+         vRLw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785870622; x=1786475422;
+        h=content-type:to:subject:message-id:date:from:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=RWBnrz4s9CViuW9WGCIUmgJSpitPNjttoCK6MCzBC8E=;
+        b=NwKTwvA/qte7QauR5qRvPqBY9b39YnVkaskWcCKLLoKwzMYTzwKOZX+JRXwfp34sIX
+         yLpsC33vhFvTx2Z9RLRLrIbvqo9NGHdOfYQHDLfb2hqC7Y5Sht7hFX2VLUXcCUAYEXdL
+         MFRVzxt/GsktGGrf+/Rf4z/5sHQ4vtxptccGzw/Me7mVrLFUYCoc1vv+xlusX46YgZMs
+         Tq45zirT8O6XJhoPc1GictoZzQWVScdroBsrShfyxk5RTQgEj0+Zb48WSHhS6pQOUnOw
+         04PQSTLnrxTEg3qjALDsKpSoHk/MySFiLZkHsrgGVZ1is2gX8gTwB1ApTA4cgVT3pLnD
+         qOfA==
+X-Gm-Message-State: AOJu0YxmNsysQBUMUwWZ4XKCO2KGkuAALNbs6oewqae4Ds3ZyV2YybEw
+	G9RSTzwGzsUD9wOzwIUblRfXXxOnB2tXvJQi2GLtIebIwYu7cOSrA2h5CZ9hPDmpQjF4hycEMgF
+	tEzcf6vU2kGy4JTFiLK6RP349VNWx3ipkog==
+X-Gm-Gg: AR+sD11xmV0GxV48oW4wYEn47dK4Ljohg4Nm5Jt6yPpFI/q5P/utAWQTsVhX8qOa5HL
+	oKKv579znEpv/zgLqVEqroDeIADoBYPp8zixMkMMFt/N4Sfa7R4UNNWU+KSfedUEodNTh3kILi3
+	BGm+Hy+T3+Dy62VvMCGD8WoefC38xHA3lwj/z/CX54HjqtiaBPi/72JDhVv9gVvnll5xv9XDL8Y
+	Y0S98Aobh31sRZWrJpvJASUh12rE4m/+kfMDYQG21ofdtv9HtTNTBPDHTg5PQy/8QghzlHk/r2m
+	nUVC7NgNWICZclrqp8MhdgJ7fFvUzTpJw+r8voa7q+6t/KVzgr4tndmlqZul+sBeZFietwpW8HF
+	gP44eh/9EJ6KGk2yHcusxUgOqaw==
+X-Received: by 2002:a05:622a:1aaa:b0:517:96f0:5658 with SMTP id
+ d75a77b69052e-52ce5feaa9bmr15060871cf.14.1785870621951; Tue, 04 Aug 2026
+ 12:10:21 -0700 (PDT)
+MIME-Version: 1.0
+From: Shakti Singh <developer.shaktisingh@gmail.com>
+Date: Tue, 4 Aug 2026 15:10:09 -0400
+X-Gm-Features: AUfX_mx7Re5dXjgw8gDeIscOuA7c_lf5Yf6ODMa8LV7aG54aDUkZcOEB64jyzCE
+Message-ID: <CAL8un_iGLcsBuUMcoCEQ3Yho0cq-dijrPH4zXcEPELJ0n7LUoA@mail.gmail.com>
+Subject: Application for UX Designer Role - Priya Patel
+To: sanyamkumat@gmail.com
+Content-Type: multipart/alternative; boundary="000000000000094d4606583d6833"
+
+--000000000000094d4606583d6833
+Content-Type: text/plain; charset="UTF-8"
+
+Dear Recruiter,
+
+Please accept this email as my application for the UX Designer position. I
+have four years of experience designing user-centered mobile and web
+interfaces, and a strong portfolio of case studies I would love to share.
+
+Looking forward to your response.
+
+Best,
+Priya Patel
+
+--000000000000094d4606583d6833
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Dear Recruiter,<div><br></div><div>Please accept this emai=
+l as my application for the UX Designer position. I have four years of expe=
+rience designing user-centered mobile and web interfaces, and a strong port=
+folio of case studies I would love to share.</div><div><br></div><div>Looki=
+ng forward to your response.</div><div><br></div><div>Best,</div><div>Priya=
+ Patel</div></div>
+
+--000000000000094d4606583d6833--

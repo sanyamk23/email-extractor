@@ -1,0 +1,134 @@
+Delivered-To: sanyamkumat@gmail.com
+Received: by 2002:a0c:e9c7:0:b0:8da:e324:b7c0 with SMTP id q7csp5586577qvo;
+        Tue, 4 Aug 2026 12:17:56 -0700 (PDT)
+X-Received: by 2002:a05:620a:8807:b0:934:b6f9:33e6 with SMTP id af79cd13be357-9364901e870mr86197385a.18.1785871076267;
+        Tue, 04 Aug 2026 12:17:56 -0700 (PDT)
+ARC-Seal: i=2; a=rsa-sha256; t=1785871076; cv=pass;
+        d=google.com; s=arc-20260327;
+        b=MtV90T9ERpQ3V7pTk3eA59MW335oYhDhutlHwA1OLVUREuPn2TLFPtxCElRjtOq+kK
+         MEsUNuyBtzWKxVAvaICIISbCE8tnwcy6lwMvlpKrT8lM+5yJAE2dnVlV3GRxmr8YDIjj
+         v8amb1UCjNOaemzA1d7FlV4IDk4Eh0GKbhGtQurif31/5yOSew+LH35NrRQXTkTOfjTe
+         aUZLJ3XurlYJPZcSh2NAEajNgu8r+OkBJSGChMDYUxaa/V3M+YDZ914uVOv9upvXmDCp
+         vdGuMYOGnWgNStA51oklMJjOBzAVfW39ybtrJzJrcBw0fw9zKhZthHfERNXojMAr7RUL
+         MvVg==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=o1g5q7zQi9oIbmI/TxzrTmXuTDSqj0re+xLCAJomnMU=;
+        fh=Tx6dviNo0nED3MTuGW74/DJMVpAUrRmua2x/YE6vZt8=;
+        b=Mc9LuoHT9ht1XhwsjSVBCWx643pD5s6itvqe/Hc4w53xHHmM/9QHESa7FguvIgORVb
+         Sp3XPs29fvz81+PHgAjxKnFjQIZK4koAX7OMn1wmyidS/gy1aRUANKm63ZecwnBhKejs
+         kBCIc9Qho/pkxunFyBP2IK7HaqmG1ETXlcDjASef2uy00eFRDtDlNXOHCHOe/hurhxwX
+         eE9TXhOIq77yqUCBdrFGWhjwdaf+9TeSq0AZGINIV12Dhj5HVjvmT9rCNKQCXsrNDFU8
+         vLjh+Wlegz/URKz7ylBMcT+945w7cFuC+/GOwEpdquoibOl2t6RTpeb4ZJnETM8jwuCa
+         roXw==;
+        dara=google.com
+ARC-Authentication-Results: i=2; mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20251104 header.b="Moj/htEU";
+       arc=pass (i=1);
+       spf=pass (google.com: domain of developer.shaktisingh@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=developer.shaktisingh@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;
+       dara=pass header.i=@gmail.com
+Return-Path: <developer.shaktisingh@gmail.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id af79cd13be357-936417027cesor116974585a.1.2026.08.04.12.17.56
+        for <sanyamkumat@gmail.com>
+        (Google Transport Security);
+        Tue, 04 Aug 2026 12:17:56 -0700 (PDT)
+Received-SPF: pass (google.com: domain of developer.shaktisingh@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20251104 header.b="Moj/htEU";
+       arc=pass (i=1);
+       spf=pass (google.com: domain of developer.shaktisingh@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=developer.shaktisingh@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;
+       dara=pass header.i=@gmail.com
+ARC-Seal: i=1; a=rsa-sha256; t=1785871076; cv=none;
+        d=google.com; s=arc-20260327;
+        b=eu8DO/PfA9YsWOywDWl+uFVjFveE3ybMd/rXheU2uKZCJLigSkoL3KymIkykmWF7Su
+         kanmU+RFa1NQqqiimmWiF7v5rGr1ZOupC9WOh1x82PAERQNfkfOmJANw+4vo50y40ZNm
+         LL92dWnFELnnMl6mcIippOMsTqCJkJRdQHSMgP1io2EF/GY8AZKr5UvOIcSfAp8qiirV
+         HiDXnToAlrkMIEYVTuskslou+vU+6eFw8FyCMCESaIdy2eXGq37yEfiRVNcPtRayOV5X
+         2PJrbx2JJPwKJNEt/XUOsy/yEZGqEOTwQ9PWTIYcboKL0nlePWDGCygKXjQLawuXq/Ap
+         Xp1Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=o1g5q7zQi9oIbmI/TxzrTmXuTDSqj0re+xLCAJomnMU=;
+        fh=Tx6dviNo0nED3MTuGW74/DJMVpAUrRmua2x/YE6vZt8=;
+        b=kZKukCIaZ/j+GEqbjpGDDN+IpLXcZ16HH59pYDq4W4R/BzYceGEGYWYKmfnjNrcglY
+         z2/wQp4bmFoO3Fx9HDCXux6xKhEv8aRauHS4FPxOonCi2/7J5vYBsJEHfPqsRHjNSb8Z
+         9CXnAuJkfbNy3dyZkGgpcobT83OBd32/qEWkb6W1gP6l1gMVMAtuw8LqIpbTbTv9yrVE
+         RmUo0W1TRnyZOX67uvuQoElZwneQXAN4bdhCxt4C+yL7a+xvolhQrpdXWZXyajOg8nzm
+         v65euw84VZR+1SEAyV+ZoEz0Tl+z/1ooNso9M35U3CNl9M9meVgpsV7Mw98NFHRMl5SY
+         NZtw==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1785871076; x=1786475876; dara=google.com;
+        h=content-type:to:subject:message-id:date:from:mime-version:from:to
+         :cc:subject:date:message-id:reply-to:content-type;
+        bh=o1g5q7zQi9oIbmI/TxzrTmXuTDSqj0re+xLCAJomnMU=;
+        b=Moj/htEUKgYz4TU7A+cI2Cr8ddcKC+fr4sYcsJxa2a7vaZtumYP8CTjaD9XIdr6W+Y
+         ft/n/qflIrcJtacxcgad3XcRtaJnosQ1SOtXeO8InutOb2NNNngKhCHctZFeS+ojvbKv
+         hqsalWKPkcY6biKkavkyFlQEYi9bfBuoIYvVNQeP7JJsHghoTJcq3UnWB5j8NSp9pf3+
+         68d05p50cbp38Z3DwsX4R0ovzjSjmdJVgjJVRgWFidGOvU6psRpzOSRzX2uqqrdPEW7m
+         W71tygLeGpxr8oDyorkavkOmMX8GKiJyAv/ER6osjNye6Jobz93kuvoMSFSW5K83PzPb
+         6acg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785871076; x=1786475876;
+        h=content-type:to:subject:message-id:date:from:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=o1g5q7zQi9oIbmI/TxzrTmXuTDSqj0re+xLCAJomnMU=;
+        b=JVkQag9GnudbVgoULLyoiQdwNx4shxkzxFLhqpb36vG38vwgBBm4fUaaR/YMU99Fjo
+         QYUlVYNwB80s0vueivmFsvCoNDIYke+qxJ6wc8Z+fjiuwxwEIcly/NMnMSi6QIv2LVR0
+         +PWfNhxsKA997IO/DqpsU9THBFlEVXqokmU1GeNIcm6QSBgKlIra/8jjlyDWI0dLPLEM
+         ejygmTo0TqeybThcLSNEiFB5nsOZV6sCJWYV8xk3JxqcK+PMq0jtSHEV5N0t07VSiVwo
+         /XE06UFX/xgPxGu6kyK8+1Ct7aN9nn+dy2H9K/sRt8XAwDmP0yixkekVxQ7AzaGZ6GHB
+         VFBg==
+X-Gm-Message-State: AOJu0YyJqo1PceGaj9Atdds7wZxjRGPzWs+D4pW0sESC8F5bysBQ22LJ
+	oHNFObrKGE+xFX6nwVQB4LHjwV6wG96cKpFd/JuyAyxg7igaEXqClsj5hnPHUU7xJ6hMpkiKtLA
+	t5g+1t+QRoulwdn4Ay/6HvZbsHzEo82sZvA==
+X-Gm-Gg: AR+sD134Rc4Bi7YsOf/TgjGI/dFkiNiUhev04Y0uM9nly6H56//yMtMR4CVLGA4XwEP
+	euf+uGMpJtZjyocF/2/YQaG5DbpAFUHCRrvD48cdve5lRK+wS/GxjMDxsCcswdh0IaonQx/DagA
+	V1UZc3jggXLYjp8sU96377jg4vRmxBfE24VZJTnv/W+95NwQTD2N4h4lfD+hNb4Tmt2VTVGo77+
+	uq0HWJ6RNxzbnA7FJXuY8sC+oM2VsdvV7AmsfFrN+bZ+DFxfMbgrmvMcSD861ygP82r+UhaiVdT
+	GWqhz+SL+KpEvunP5ZH9k9PH9TH6BISzhNrkMhoXV2OwNqxw8dyl5iOGVS4d+b29EkS764kOs55
+	/241W5Q0ZHZLO5Q8kBHy1Or+AFw==
+X-Received: by 2002:a05:620a:2b8d:b0:92e:54b3:3f86 with SMTP id
+ af79cd13be357-936490e850dmr84689885a.29.1785871075795; Tue, 04 Aug 2026
+ 12:17:55 -0700 (PDT)
+MIME-Version: 1.0
+From: Shakti Singh <developer.shaktisingh@gmail.com>
+Date: Tue, 4 Aug 2026 15:17:43 -0400
+X-Gm-Features: AUfX_mwjHvz1m7vTudNhWQD06CzIj67ZNDqXKZtcHYkgOugVCb3YIsgTvgBBL0Q
+Message-ID: <CAL8un_gF=eDb5tsTvYhT69OrFLdO0Jn0siCstKhp==CbpO0udQ@mail.gmail.com>
+Subject: Job Description: Data Analyst at Finlytics Solutions
+To: sanyamkumat@gmail.com
+Content-Type: multipart/alternative; boundary="0000000000001668a806583d83c8"
+
+--0000000000001668a806583d83c8
+Content-Type: text/plain; charset="UTF-8"
+
+Position: Data Analyst
+Company: Finlytics Solutions
+Location: Chicago, IL (Hybrid)
+
+Finlytics Solutions is hiring a Data Analyst to support our finance and
+operations teams. You will build dashboards, analyze large datasets, and
+present insights to stakeholders.
+
+Requirements: Proficiency in SQL and Python, experience with visualization
+tools like Tableau or Power BI, and strong communication skills.
+
+--0000000000001668a806583d83c8
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Position: Data Analyst<div>Company: Finlytics Solutions</d=
+iv><div>Location: Chicago, IL (Hybrid)</div><div><br></div><div>Finlytics S=
+olutions is hiring a Data Analyst to support our finance and operations tea=
+ms. You will build dashboards, analyze large datasets, and present insights=
+ to stakeholders.</div><div><br></div><div>Requirements: Proficiency in SQL=
+ and Python, experience with visualization tools like Tableau or Power BI, =
+and strong communication skills.</div></div>
+
+--0000000000001668a806583d83c8--

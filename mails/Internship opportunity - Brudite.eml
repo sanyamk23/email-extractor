@@ -1,0 +1,206 @@
+Delivered-To: sanyamkumat@gmail.com
+Received: by 2002:a0c:e9c7:0:b0:8da:e324:b7c0 with SMTP id q7csp5546169qvo;
+        Tue, 4 Aug 2026 11:35:46 -0700 (PDT)
+X-Received: by 2002:a05:6402:1908:b0:699:8397:55ec with SMTP id 4fb4d7f45d1cf-6a14f0cfe96mr567047a12.7.1785868546067;
+        Tue, 04 Aug 2026 11:35:46 -0700 (PDT)
+ARC-Seal: i=2; a=rsa-sha256; t=1785868546; cv=pass;
+        d=google.com; s=arc-20260327;
+        b=q23XxPpVQ9lqDzfk0GMKPXc4IhYYi6zvMvHuAgC5yaup4M+vRe0XmUpqwgluF6eLbl
+         Qu+X4GPgx/QEtAs8m9Pya2L1zmSyu8DuKVeOeC0nIJNn87BerDodGz73f9E56uz0JoX+
+         kUEXpTVfqSQfSHgbl1UXKSyjEXYg/mEHipp8Dpy5C+VzzU3VMrLuIzhhFJDql5+j2OWE
+         ei1MZK3DzcVNXQttfGrUv185MgdQGTLTVtje8QowBrkVgvEOV0oBo+5qXU5l4sZSe6/w
+         R5VRyN7bjSca3D63nrxXdr9rJCznRcyx1s2DUjn5KimyihaLdlHkS0fDANoPH0nsWN9i
+         It4A==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :dkim-signature;
+        bh=XwPbb4wOZt8shF8cGHIgJzCqckt2HqBsIeKgapbXo94=;
+        fh=IYrUzc4cFoFCy07C38kkgapoVXGaw0ZmYX96RLKuz6c=;
+        b=ES7Ba5JIMpnmOF2KtYxyOk3wuuDfbGD+ZxUaFM4DqsLONdmaQ3fGSM/xLMGFe5aADZ
+         LdPyUYljDRqonyqNo5rhT8ARJvPdb1EljnwrSHM2u0Evpi23tk8nGVaipJS9TTKIGeC2
+         B2/RXoCwIKL/qwpqpbO6CatCr1j7SyvGRzcPTkkDjuIoHtNp7A76kU2qNh6ro4LCISSP
+         63s0TH0Et4b+y/PjOJJe72cgSgNbzL+gGrzN430hSAWqn3ceUW/geUKa9je53mN4CqTA
+         +hjmwZkhSUj9zKmNEAdHJvqmeS5BQ0H2HkqdzAPpgScFZC+CKe+xCAbBBtnMg8HHnoIG
+         AktA==;
+        dara=google.com
+ARC-Authentication-Results: i=2; mx.google.com;
+       dkim=pass header.i=@brudite.com header.s=google header.b=b0Kdw8Bn;
+       arc=pass (i=1);
+       spf=none (google.com: shakti.s@brudite.com does not designate permitted sender hosts) smtp.mailfrom=shakti.s@brudite.com;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=brudite.com;
+       dara=pass header.i=@gmail.com
+Return-Path: <shakti.s@brudite.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id 4fb4d7f45d1cf-6a145c363c3sor223390a12.1.2026.08.04.11.35.45
+        for <sanyamkumat@gmail.com>
+        (Google Transport Security);
+        Tue, 04 Aug 2026 11:35:46 -0700 (PDT)
+Received-SPF: none (google.com: shakti.s@brudite.com does not designate permitted sender hosts) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@brudite.com header.s=google header.b=b0Kdw8Bn;
+       arc=pass (i=1);
+       spf=none (google.com: shakti.s@brudite.com does not designate permitted sender hosts) smtp.mailfrom=shakti.s@brudite.com;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=brudite.com;
+       dara=pass header.i=@gmail.com
+ARC-Seal: i=1; a=rsa-sha256; t=1785868545; cv=none;
+        d=google.com; s=arc-20260327;
+        b=UeC5F74xCQspCZvlZdIkKwcyEjwtV8luc2jSD6/kuGlIR2k4jilLW9SSEpHRV6dWJU
+         X+NPdrzFgYkace9Ot7JOM4IY4pNtvWlakPG/oMu0rjLFkPRVoykDqSX2LKJkr0tyjFfK
+         6WabF3CgeSKqfBwZWebs4nGbinmp8TcSAbMpvCT20+bXLORdjo3huxLaXP3PJCqbsyoT
+         areQVFLHFdsB3bA4G6LOffLqV1sIA1apwmuy+UdGZP6JTcvFOGB5BhCvkuJ8CYDLNedu
+         6mX5mi8K4+62pj8cVaOv/KySUYiryZ77V9U8O/q1ZpHIsrJjZBPbl8GoDHA2+X9gU+Hh
+         Tpig==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :dkim-signature;
+        bh=XwPbb4wOZt8shF8cGHIgJzCqckt2HqBsIeKgapbXo94=;
+        fh=IYrUzc4cFoFCy07C38kkgapoVXGaw0ZmYX96RLKuz6c=;
+        b=sh4isEDOEQCbfGWg6A62p2abPiPDNbusUD3JuBSNdhBOrEBqP9QnMqHbOY1TgRnDic
+         /kVYsJvToEeQ4ApXoyy0sYBgBbkRnuyqborwKy7AxrTySO9HL3tcvGjlHKmjT2+Lf37F
+         oQqq71VuzJEELmkkzekkeKSx8kKuyJ3DsCWEGU79NedS056L/PELV/G00YkMP6mXiEyV
+         XnYwOd5jdYwv8PyBOcD5CHet4Pcr5F2MC8S7rJ52OxMrToahCDtmdRog849pn++XxnY4
+         uBV0n+NUnheMjC+ta2nIgBtoBj/LKsCTtaqhyG+J7QuhFbtPCcz7A2dg8dsKtuDvXIYD
+         0hFQ==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=brudite.com; s=google; t=1785868545; x=1786473345; dara=google.com;
+        h=content-type:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=XwPbb4wOZt8shF8cGHIgJzCqckt2HqBsIeKgapbXo94=;
+        b=b0Kdw8Bn3ezbDzbnCDI86pkzlx4r2yqEhxxVqAg13E68RWHzgC5RJMlyD9TbBAVlYc
+         dw5+k/cvgPfi8ZE27/WhnHFSxn67x4+MuOPjJq2USB3+SXed3Sr3b0zViAli4DWIVSGq
+         UCMz08CCKeEJwAw9SEOftfDX4y9g5d+8zfZguss5UQqDoRVqUY+yRtLmkp6b8Z3DkYHm
+         Z4wfWAFWzmFqs+XDZRQhiLK53xECUQi4A7oVRAVe/nlomo/YzX1AHDdijzQrb0VTX5K3
+         4nQiDG3Dm9h85tnc1lYGjhCY+rn97iN2ZD0CLCNBJv+4Fgtq59bQFLJOG48zlsoCNzdN
+         /lWQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785868545; x=1786473345;
+        h=content-type:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=XwPbb4wOZt8shF8cGHIgJzCqckt2HqBsIeKgapbXo94=;
+        b=LoMt46UMWgAo9cNOil06cokBbvEeeOSi+hriq9thDKnwF95jEpQPVG7N8XC1FJ+wRF
+         XoChAdHR+s44VemRvvqlnWyoG87KodWOoTSE2h6TntC8ADVJ0Q1icgrM5t9D0zmf3HKI
+         fMMZEWPMgpgONUSzAdbpCBBXWwO1ZDW3LdyfHXu7szl9qgQlhE8n++5sSQQ8kJB5AUk/
+         /x+dDHOZgQ91rnQrCwVU/+Y1052zm1sLuRtmAW0PlbEDf4GDV7IgyC5GbFSTYyhKzH3e
+         ES4xGrHiejeUPtDEjApz2Y1p+awJBLcRT7ZzVAQYxyEEniBtiok36jSQufNZNOh561/C
+         tQIA==
+X-Gm-Message-State: AOJu0YwN7W1OEC7O2xAB1DLZbFM9TbJt4QKpC+fsdLTOj3ol73TgR0JG
+	sENdu4b6aOh690GL6x6gdVAvtCcK+tYkLiFYm365PrTC7o/jb52/0KGKk2KLj5p8h1bEI+niK27
+	WhMHe3vNuq3CSOVNMPMqmzjnAH5gLOQDGGZzp0XHfXH0GLRAxn0gzz3E=
+X-Gm-Gg: AR+sD13OaWpVQFGxQoMyaemfnIUvzYJ74Ygb5jMFeX0/vUlicfRcKH1u+45z5DwCDuA
+	Meg4Dt5WHvq95g6uo4KZ+3DATjIZUF7KszCYScZc88lCRC/nToKKRWvpAKZ4lsVtStxm5dAiTCC
+	zBqJlzvAQcQRV+3tDWmGVR1F7yoNX1JBIJ9w4o+0SaTLDdBvPP3r8UcWt/AbJVf/FDpbhX/OsIj
+	veyYtzOkvGn89cJ359AIvuXAwPBwX5oSPKqWhGiAsVMOlII8dmt43TY9zj9+PX/7wfS6UTBc/Jm
+	azpmYnYaWQ9AyDeuK+Wa1tGftQQHt/UQEJDphPM2aBQ8QShq1zuDLS3PDrzThRr32DORnjPth4J
+	DMLb2INWchYp9Sj04za2buab1yVbC8zu6Bw==
+X-Received: by 2002:a05:6402:2812:b0:698:5f89:9a51 with SMTP id
+ 4fb4d7f45d1cf-6a14f0c4d9dmr589806a12.5.1785868545328; Tue, 04 Aug 2026
+ 11:35:45 -0700 (PDT)
+MIME-Version: 1.0
+References: <CAKaENG9XJM1qL7Wtis0wuQEce9LdE00qCbPmtfY0-f_3qnUSXA@mail.gmail.com>
+ <CAHXjXkvcD8A6Gr6Qaa+wLJreerctq0MgR-Rq79k2Qs=vxEFGfQ@mail.gmail.com>
+In-Reply-To: <CAHXjXkvcD8A6Gr6Qaa+wLJreerctq0MgR-Rq79k2Qs=vxEFGfQ@mail.gmail.com>
+From: Shakti Singh <shakti.s@brudite.com>
+Date: Tue, 4 Aug 2026 14:35:34 -0400
+X-Gm-Features: AUfX_mxCDe0jCTHOW6B5buehG4dTCATJ4YazrWJCtOJDcnXWL0icjMoVWG_YYIc
+Message-ID: <CAKaENG-mR5v0uTc1Dvk9A7Cs1DjnbFSeQ5JjzHOQRgV8R5g6Ww@mail.gmail.com>
+Subject: Fwd: Internship opportunity - Brudite
+To: "sanyamkumat@gmail.com" <sanyamkumat@gmail.com>
+Content-Type: multipart/alternative; boundary="0000000000004296df06583cecb0"
+
+--0000000000004296df06583cecb0
+Content-Type: text/plain; charset="UTF-8"
+
+---------- Forwarded message ---------
+From: Priyanshu <priyanshucse849@gmail.com>
+Date: Thu, 16 Jul 2026 at 09:03
+Subject: Re: Internship opportunity - Brudite
+To: Shakti Singh <shakti.s@brudite.com>
+
+
+Dear Shakti Sir,
+
+Thank you for reaching out.
+
+Please find my resume attached for your review.
+
+I am a final-year B.Tech (CSE) student with experience in Generative AI,
+Machine Learning, Data Analysis, Python, LangChain, RAG, SQL, and
+Streamlit-based AI application development.
+
+Recently, I have worked on projects such as an *AI-Based Resume Analysis &
+Job Recommendation System*, *MedLocker AI (a collaborative OCR and
+RAG-based healthcare project)*, a *RAG-based PDF Question Answering
+Application*.
+
+*Live Project:* https://jobfit-ai-849.streamlit.app/
+
+I would be happy to discuss my experience and suitability for the
+internship further.
+
+Thank you for your time and consideration.
+
+Best Regards,
+*Priyanshu Raj*
+GitHub: https://github.com/Priyanshu-Raj81
+
+>
+
+-- 
+
+Shakti Singh
+Associate Software Engineer
+Brudite Private Limited
+8930257439
+shakti.s@brudite.com
+
+--0000000000004296df06583cecb0
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><br><br><div class=3D"gmail_quote gmail_quote_container"><=
+div dir=3D"ltr" class=3D"gmail_attr">---------- Forwarded message ---------=
+<br>From: <strong class=3D"gmail_sendername" dir=3D"auto">Priyanshu</strong=
+> <span dir=3D"auto">&lt;<a href=3D"mailto:priyanshucse849@gmail.com">priya=
+nshucse849@gmail.com</a>&gt;</span><br>Date: Thu, 16 Jul 2026 at 09:03<br>S=
+ubject: Re: Internship opportunity - Brudite<br>To: Shakti Singh &lt;<a hre=
+f=3D"mailto:shakti.s@brudite.com">shakti.s@brudite.com</a>&gt;<br></div><br=
+><br><div dir=3D"ltr"><div dir=3D"ltr"><p>Dear Shakti Sir,<span aria-hidden=
+=3D"true"></span></p><p>Thank you for reaching out.</p><p>Please find my re=
+sume attached for your review.</p><p>I am a final-year B.Tech (CSE) student=
+ with experience in Generative AI, Machine Learning, Data Analysis, Python,=
+ LangChain, RAG, SQL, and Streamlit-based AI application development.</p><p=
+>Recently, I have worked on projects such as an <strong>AI-Based Resume Ana=
+lysis &amp; Job Recommendation System</strong>, <strong>MedLocker AI (a col=
+laborative OCR and RAG-based healthcare project)</strong>, a <strong>RAG-ba=
+sed PDF Question Answering Application</strong>.</p><p><strong>Live Project=
+:</strong> <a rel=3D"noopener" href=3D"https://jobfit-ai-849.streamlit.app/=
+" target=3D"_blank">https://jobfit-ai-849.streamlit.app/</a></p><p>I would =
+be happy to discuss my experience and suitability for the internship furthe=
+r.</p><p>Thank you for your time and consideration.</p><p>
+
+
+
+
+
+
+
+</p><p>Best Regards,<br>
+<strong>Priyanshu Raj</strong><br>
+GitHub: <a rel=3D"noopener">https://github.com/Priyanshu-Raj81</a></p></div=
+><div class=3D"gmail_quote"><blockquote class=3D"gmail_quote" style=3D"marg=
+in:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1e=
+x"><div dir=3D"ltr"><div dir=3D"ltr" class=3D"gmail_signature"><div dir=3D"=
+ltr"></div></div></div>
+</blockquote></div></div>
+</div><div><br clear=3D"all"></div><div><br></div><span class=3D"gmail_sign=
+ature_prefix">-- </span><br><div dir=3D"ltr" class=3D"gmail_signature" data=
+-smartmail=3D"gmail_signature"><div dir=3D"ltr"><p>Shakti Singh<br>Associat=
+e Software Engineer<br>Brudite Private Limited<br>8930257439<br><a href=3D"=
+mailto:shakti.s@brudite.com" target=3D"_blank">shakti.s@brudite.com</a></p>=
+</div></div></div>
+
+--0000000000004296df06583cecb0--
