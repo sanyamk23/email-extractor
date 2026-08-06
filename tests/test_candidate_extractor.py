@@ -5,7 +5,8 @@ from email_extractor.candidate_extractor import (
     extract_candidate, extract_skills, extract_education,
     extract_seniority, extract_location, extract_company, extract_sender,
     extract_start_date, extract_work_type, extract_languages,
-    extract_certifications,
+    extract_certifications, extract_hiring_manager,
+    extract_job_id, extract_relocation,
 )
 from email_extractor import parse_job_application
 from pathlib import Path
@@ -468,3 +469,76 @@ def test_alex_kumar_eml_extracts_all_details():
     # Must round-trip through JSON (no sets / non-serialisable objects).
     import json
     json.dumps(result)
+
+
+# ── Regression: false-positive and quality fixes ────────────────────────────────
+def test_skills_no_mode_false_positive():
+    # "Mode Analytics" is a legit skill, but bare "Mode" must not fire on
+    # "Preferred Work Mode" or similar prose.
+    skills = extract_skills("Preferred Work Mode\n\nMicrosoft Excel, Microsoft Office")
+    assert "Excel" in skills
+    assert "Mode" not in skills
+
+
+def test_skills_hr_keywords_extracted():
+    body = ("Recruitment & Talent Acquisition\n"
+            "Resume Screening, Interview Coordination, Employee Onboarding\n"
+            "HR Documentation, HRMS Basics, Payroll Fundamentals")
+    skills = extract_skills(body)
+    for kw in ("Recruitment", "Talent Acquisition", "Resume Screening",
+               "Interview Coordination", "Employee Onboarding",
+               "HR Documentation", "HRMS", "Payroll"):
+        assert kw in skills, f"missing {kw}"
+
+
+def test_education_no_short_abbreviation_false_positive():
+    # 2-char education abbreviations like "ME" must not match the pronoun "me".
+    assert extract_education("I would sincerely appreciate the opportunity for me to join") == []
+    assert "ME" not in extract_education("for me to apply")
+
+
+def test_hiring_manager_not_from_bullet_list():
+    # "Talent Acquisition Coordinator" as a bullet point should not yield
+    # "Coordinator" as the hiring manager.
+    body = "- Preferred Roles: HR Executive, HR Associate, Talent Acquisition\nCoordinator"
+    assert extract_hiring_manager(body) is None
+
+
+def test_job_role_stops_at_slash():
+    raw = ("From: Akarsh <a@b.com>\n"
+           "Subject: Application for HR Executive / Talent Acquisition Opportunities\n"
+           "Content-Type: text/plain\n\n"
+           "Dear Hiring Manager,\nKind Regards,\nJane Doe")
+    result = parse_job_application(raw)
+    assert result["job_role"] == "HR Executive"
+
+
+def test_hr_application_full_extraction():
+    raw = ("From: Akarsh Chaturvedi <chaturvediakarsh51@gmail.com>\n"
+           "Subject: Application for HR Executive\n"
+           "Date: Wed, 06 Aug 2025 10:00:00 +0000\n"
+           "MIME-Version: 1.0\n"
+           "Content-Type: text/plain; charset=utf-8\n\n"
+           "Dear Hiring Manager,\n\n"
+           "My name is *Palak Sharma*,\n\n"
+           "Skills: Recruitment, Talent Acquisition, Microsoft Excel\n"
+           "Education: MBA\n"
+           "Experience: Fresher (0 Years)\n"
+           "Open to relocation if required.\n\n"
+           "Kind Regards,\n\n"
+           "*Palak Sharma*")
+    result = parse_job_application(raw)
+    c = result["candidate"]
+    assert c["name"] == "Palak Sharma"
+    assert c["email"] is None          # forwarder is a proxy; no candidate email in body
+    assert c["skills"] == ["Recruitment", "Talent Acquisition", "Excel"]
+    assert c["education"] == ["MBA"]
+    assert c["years_of_experience"] == "0"
+    assert c["relocation"] == "yes"
+    assert c["hiring_manager"] is None
+
+
+def test_phone_international_full_number():
+    phones = extract_phones("Contact +1-555-019-9494 or (555) 019-9494")
+    assert "+15550199494" in phones
+    assert len(phones) == 1  # both formats normalise to the same E.164 number

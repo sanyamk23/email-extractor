@@ -1,6 +1,7 @@
 """Extract structured candidate details (name, contact, links, metrics)."""
 from __future__ import annotations
 
+import email
 import re
 
 from . import config
@@ -454,6 +455,260 @@ def extract_certifications(body: str) -> list[str]:
     return _extract_keywords(body, config.COMPILED_CERTIFICATIONS, limit=15)
 
 
+def _clean_entity(text: str | None) -> str | None:
+    """Trim and validate a captured entity (company, role, team, etc.)."""
+    if not text:
+        return None
+    text = text.strip().strip(" ,.;:-")
+    if not text:
+        return None
+    # Reject if it looks like prose (not all tokens capitalized)
+    toks = [t.strip(",") for t in text.split() if t.strip(",")]
+    if not toks or not all(t[:1].isupper() for t in toks):
+        return None
+    if len(toks) > 6:
+        return None
+    return text
+
+
+def extract_current_company(body: str) -> str | None:
+    """Return the candidate's current company/employer, or None."""
+    if not body:
+        return None
+    for pattern in config.CURRENT_COMPANY_PATTERNS:
+        match = pattern.search(body)
+        if match and match.group(1):
+            company = _clean_entity(match.group(1))
+            if company:
+                return company
+    return None
+
+
+def extract_current_role(body: str) -> str | None:
+    """Return the candidate's current role/title, or None."""
+    if not body:
+        return None
+    for pattern in config.CURRENT_ROLE_PATTERNS:
+        match = pattern.search(body)
+        if match and match.group(1):
+            role = _clean_entity(match.group(1))
+            if role:
+                # Filter out common false positives
+                role_lower = role.lower()
+                if role_lower in {"the", "a", "an", "my", "your", "our", "this", "that"}:
+                    continue
+                return role
+    return None
+
+
+def extract_visa_status(body: str) -> str | None:
+    """Return visa/work authorization status, or None."""
+    if not body:
+        return None
+    for pattern in config.VISA_PATTERNS:
+        match = pattern.search(body)
+        if match:
+            # Return the matched text (canonicalize common forms)
+            text = match.group(0).lower()
+            if "h1b" in text or "h-1b" in text:
+                return "H-1B"
+            if "l1" in text or "l-1" in text:
+                return "L-1"
+            if "opt" in text:
+                return "OPT"
+            if "cpt" in text:
+                return "CPT"
+            if "green card" in text or "permanent resident" in text:
+                return "Green Card"
+            if "citizen" in text:
+                return "US Citizen"
+            if "sponsor" in text:
+                return "Requires Sponsorship"
+            if "authorized" in text or "eligible" in text:
+                return "Authorized to Work"
+            return match.group(0)
+    return None
+
+
+def extract_relocation(body: str) -> str | None:
+    """Return relocation willingness: 'yes', 'no', 'maybe', or None."""
+    if not body:
+        return None
+    for pattern in config.RELOCATION_PATTERNS:
+        match = pattern.search(body)
+        if match:
+            text = match.group(0).lower()
+            if any(w in text for w in ["not willing", "cannot", "unwilling", "no relocation", "not possible"]):
+                return "no"
+            if any(w in text for w in ["willing", "open to", "possible", "ok", "yes", "happy to", "can relocate"]):
+                return "yes"
+            # Check for explicit yes/no in capture group
+            if match.lastindex and match.group(1):
+                val = match.group(1).lower()
+                if val in {"yes", "no", "maybe", "negotiable", "preferred"}:
+                    return val
+            return "yes"
+    return None
+
+
+def extract_travel(body: str) -> str | None:
+    """Return travel willingness: percentage, 'yes', 'no', 'minimal', etc., or None."""
+    if not body:
+        return None
+    for pattern in config.TRAVEL_PATTERNS:
+        match = pattern.search(body)
+        if match:
+            text = match.group(0).lower()
+            if any(w in text for w in ["not willing", "cannot", "no travel", "not possible"]):
+                return "no"
+            if any(w in text for w in ["willing", "open to", "ok", "yes"]):
+                return "yes"
+            # Percentage capture
+            if match.lastindex and match.group(1) and match.group(1).isdigit():
+                return f"{match.group(1)}%"
+            # Explicit level capture
+            if match.lastindex and match.group(1):
+                val = match.group(1).lower()
+                if val in {"yes", "no", "minimal", "moderate", "extensive", "negotiable"}:
+                    return val
+            return "yes"
+    return None
+
+
+def extract_security_clearance(body: str) -> str | None:
+    """Return security clearance level, or None."""
+    if not body:
+        return None
+    for pattern in config.SECURITY_CLEARANCE_PATTERNS:
+        match = pattern.search(body)
+        if match:
+            text = match.group(0).lower()
+            if "top secret" in text or "ts" == text.strip() or "ts " in text:
+                return "Top Secret"
+            if "secret" in text and "top" not in text:
+                return "Secret"
+            if "confidential" in text:
+                return "Confidential"
+            if "public trust" in text:
+                return "Public Trust"
+            if "dv" in text:
+                return "DV"
+            if "sc " in text or " sc" == text.strip():
+                return "SC"
+            if "ctc" in text:
+                return "CTC"
+            if "nato" in text:
+                return "NATO"
+            if "active" in text or "current" in text or "eligible" in text:
+                return "Active/Eligible"
+            return match.group(0)
+    return None
+
+
+def extract_gpa(body: str) -> str | None:
+    """Return GPA or degree classification, or None."""
+    if not body:
+        return None
+    for pattern in config.GPA_PATTERNS:
+        match = pattern.search(body)
+        if match:
+            if match.lastindex and match.group(1):
+                val = match.group(1)
+                # If it's a classification, return as-is
+                if any(w in val.lower() for w in ["class", "honours", "distinction", "merit", "pass"]):
+                    return val
+                # Otherwise it's a numeric GPA
+                return val
+            return match.group(0)
+    return None
+
+
+def extract_graduation_year(body: str) -> str | None:
+    """Return graduation year (YYYY), or None."""
+    if not body:
+        return None
+    for pattern in config.GRADUATION_YEAR_PATTERNS:
+        match = pattern.search(body)
+        if match and match.group(1):
+            year = match.group(1)
+            if year.isdigit() and 1950 <= int(year) <= 2035:
+                return year
+    return None
+
+
+def extract_references(body: str) -> str | None:
+    """Return references availability: 'available', 'upon_request', or None."""
+    if not body:
+        return None
+    for pattern in config.REFERENCES_PATTERNS:
+        match = pattern.search(body)
+        if match:
+            text = match.group(0).lower()
+            if "upon request" in text or "on request" in text:
+                return "upon_request"
+            return "available"
+    return None
+
+
+def extract_job_id(body: str) -> str | None:
+    """Return job ID / requisition number, or None."""
+    if not body:
+        return None
+    for pattern in config.JOB_ID_PATTERNS:
+        match = pattern.search(body)
+        if match and match.group(1):
+            return match.group(1).upper()
+    return None
+
+
+def extract_team_department(body: str) -> str | None:
+    """Return team/department name, or None."""
+    if not body:
+        return None
+    for pattern in config.TEAM_DEPARTMENT_PATTERNS:
+        match = pattern.search(body)
+        if match and match.group(1):
+            team = _clean_entity(match.group(1))
+            if team:
+                return team
+    return None
+
+
+def extract_hiring_manager(body: str) -> str | None:
+    """Return hiring manager name from salutation, or None."""
+    if not body:
+        return None
+    for pattern in config.HIRING_MANAGER_PATTERNS:
+        match = pattern.search(body)
+        if match and match.group(1):
+            name = match.group(1).strip()
+            # Filter out generic salutations
+            if name.lower() not in {"hiring manager", "sir", "madam", "team", "all", "recruiter"}:
+                return name
+    return None
+
+
+def extract_email_headers(raw_email: str) -> dict:
+    """Extract selected headers from raw RFC-822 email string."""
+    headers = {}
+    if not raw_email:
+        return headers
+    # Only parse if it looks like RFC-822 (starts with Header: value)
+    first_line = next((ln for ln in raw_email.splitlines() if ln.strip()), "")
+    if not re.match(r"^[A-Za-z][A-Za-z0-9-]*\s*:", first_line):
+        return headers
+
+    try:
+        msg = email.message_from_string(raw_email)
+        for field in config.HEADER_FIELDS:
+            val = msg.get(field)
+            if val:
+                headers[field.replace("-", "_")] = val.strip()
+    except Exception:
+        pass
+    return headers
+
+
 def extract_candidate(from_header: str, body: str) -> dict:
     """Assemble the full ``candidate`` sub-document."""
     signoff_name = _find_signoff_name(body)
@@ -474,4 +729,16 @@ def extract_candidate(from_header: str, body: str) -> dict:
         "work_type": extract_work_type(body),
         "languages": extract_languages(body),
         "certifications": extract_certifications(body),
+        "current_company": extract_current_company(body),
+        "current_role": extract_current_role(body),
+        "visa_status": extract_visa_status(body),
+        "relocation": extract_relocation(body),
+        "travel": extract_travel(body),
+        "security_clearance": extract_security_clearance(body),
+        "gpa": extract_gpa(body),
+        "graduation_year": extract_graduation_year(body),
+        "references": extract_references(body),
+        "job_id": extract_job_id(body),
+        "team_department": extract_team_department(body),
+        "hiring_manager": extract_hiring_manager(body),
     }

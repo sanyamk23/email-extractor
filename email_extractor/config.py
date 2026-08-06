@@ -78,13 +78,13 @@ COMPILED_TRIGGERS: list[dict] = _compile_triggers()
 # The capture group holds the candidate role text; trailing company/role
 # words are stripped by the normaliser in ``role_extractor.py``.
 ROLE_PATTERNS: list[str] = [
-    r"Re:\s*Application\s+for\s+([A-Z][^.,\n]{1,80})",
-    r"Application\s+for\s+([A-Z][^.,\n]{1,80})",
-    r"applying\s+(?:for|to)\s+(?:the\s+)?([A-Z][^.,\n]{1,80})",
-    r"[Rr]ole\s*:\s*([A-Z][^.,\n]{1,80})",
-    r"[Pp]osition\s*:\s*([A-Z][^.,\n]{1,80})",
-    r"[Pp]osition\s+of\s+([A-Z][^.,\n]{1,80})",
-    r"role\s+of\s+the\s+([A-Z][^.,\n]{1,80})",
+    r"Re:\s*Application\s+for\s+([A-Z][^.,/\n]{1,80})",
+    r"Application\s+for\s+([A-Z][^.,/\n]{1,80})",
+    r"applying\s+(?:for|to)\s+(?:the\s+)?([A-Z][^.,/\n]{1,80})",
+    r"[Rr]ole\s*:\s*([A-Z][^.,/\n]{1,80})",
+    r"[Pp]osition\s*:\s*([A-Z][^.,/\n]{1,80})",
+    r"[Pp]osition\s+of\s+([A-Z][^.,/\n]{1,80})",
+    r"role\s+of\s+the\s+([A-Z][^.,/\n]{1,80})",
     r"the\s+([A-Z][A-Za-z][A-Za-z\s\-]{2,50}?)\s+(?:position|role|opening)\b",
 ]
 
@@ -330,23 +330,25 @@ SORTED_ROLE_DICTIONARY: list[str] = sorted(
 # 3. Candidate name extraction — sign-off patterns
 # ---------------------------------------------------------------------------
 # Each captures the name that appears on the line(s) immediately after a sign-off.
+# Use inline (?i:...) for sign-off phrase only; name capture must be case-sensitive
+# (so [A-Z] only matches uppercase) to avoid false positives like "appreciate".
 _NAME_TAIL = r"[*_]{0,2}[A-Z][A-Za-z’’.\-]{1,30}(?:\s+[A-Z][A-Za-z’’.\-]{1,30}){0,2}"
 SIGNOFF_PATTERNS: list[re.Pattern] = [
-    re.compile(p, re.IGNORECASE) for p in [
-        r"Sincerely[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Thanks?[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Thank\s+you[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Best\s+regards[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Best[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Warm\s+regards[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Kind\s+regards[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Regards[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Cheers[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Many\s+thanks[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Many\s+regards[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Take\s+care[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Looking\s+forward\s+to\s+hearing\s+from\s+you[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
-        r"Talk\s+soon[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+    re.compile(p) for p in [
+        r"(?i:Sincerely)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Thanks?)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Thank\s+you)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Best\s+regards)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Best)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Warm\s+regards)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Kind\s+regards)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Regards)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Cheers)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Many\s+thanks)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Many\s+regards)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Take\s+care)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Looking\s+forward\s+to\s+hearing\s+from\s+you)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
+        r"(?i:Talk\s+soon)[,.]?\s*\n\s*(" + _NAME_TAIL + r")",
     ]
 ]
 
@@ -376,14 +378,18 @@ EMAIL_REGEX: re.Pattern = re.compile(
     '''
 )
 
-# Strict-ish phone regex — requires a minimum digit density so it will not
-# match plain years such as "2026" or "5 years".
+# Strict phone regex — requires phone-like formatting to avoid matching
+# bare numbers like years, job IDs, etc. Must have at least one phone indicator:
+# +, parentheses, country code prefix, or spaces/dashes in standard positions.
 PHONE_REGEX: re.Pattern = re.compile(
     r'''(?x)
-    (?<![\d])                       # not preceded by a digit
-    (?:(?:\+|00)\d{1,3}[\s.-]?)?    # optional country code
-    (?:\(?\d{2,4}\)?[\s.-]?)?       # optional area code
-    \d{3,4}[\s.-]?\d{3,4}           # main 7-digit block
+    (?<![\d#])                      # not preceded by digit or # (avoid Req #123)
+    (?:
+        (?:\+|00)\d{1,3}[\s.-]?     # country code (+1, 001, etc.)
+        | \(\d{2,4}\)[\s.-]?        # OR area code in parens ((415), etc.)
+        | \d{2,4}[\s.-]             # OR area code with separator (415-, 415 )
+    )?
+    \d{3,4}(?:[\s./-]*\d{1,4}){1,3}  # main 7-16 digit block with separators
     (?:[\s./]*(?:ext\.?|x|\#)\s*\d+)? # optional extension
     ''')
 
@@ -530,7 +536,7 @@ SKILLS: list[str] = _dedupe_keyword_list([
     "Databricks",
     # ── analytics & bi tools ────────────────────────────────────────────────
     "Tableau", "Power BI", "PowerBI", "Looker", "LookML", "Qlik Sense",
-    "QlikView", "Apache Superset", "Superset", "Mode Analytics", "Mode",
+    "QlikView", "Apache Superset", "Superset", "Mode Analytics",
     "Periscope Data", "Periscope",
     # ── data engineering & orchestration ────────────────────────────────────
     "Apache Spark", "Spark", "Apache Airflow", "Airflow", "Apache Kafka",
@@ -550,6 +556,12 @@ SKILLS: list[str] = _dedupe_keyword_list([
     # ── product / business ─────────────────────────────────────────────────
     "Excel", "Advanced Excel", "Jira", "Confluence", "Notion",
     "Figma", "Sketch", "Adobe Analytics",
+    # ── HR & recruitment ──────────────────────────────────────────────────────
+    "Recruitment", "Talent Acquisition", "Employee Onboarding",
+    "Resume Screening", "Interview Coordination", "HR Documentation",
+    "HRMS", "Payroll", "Communication Skills",
+    "Employee Relations", "Benefits Administration", "Performance Management",
+    "Background Verification", "Exit Interview", "Compensation",
 ])
 
 
@@ -560,10 +572,10 @@ EDUCATION: list[str] = _dedupe_keyword_list([
     "MBA", "Master of Business Administration",
     "Master of Science", "Master of Engineering", "Master of Arts",
     "Master of Philosophy", "Master's", "Masters", "Master",
-    "MSc", "MS", "MA", "MEng", "ME",
+    "MSc", "MEng",
     "Bachelor of Science", "Bachelor of Engineering", "Bachelor of Arts",
     "Bachelor of Business", "Bachelor's", "Bachelors", "Bachelor",
-    "BSc", "BS", "BA", "BTech", "MTech", "MCA", "MCom",
+    "BSc", "BTech", "MTech", "MCA", "MCom",
     "Postgraduate", "Post-Graduate", "Undergraduate", "Graduate",
     "Associate degree", "Professional degree",
 ])
@@ -735,4 +747,128 @@ COMPILED_SKILLS: list[tuple[re.Pattern, str]] = _compile_keywords(SKILLS)
 COMPILED_EDUCATION: list[tuple[re.Pattern, str]] = _compile_keywords(EDUCATION)
 COMPILED_LANGUAGES: list[tuple[re.Pattern, str]] = _compile_keywords(LANGUAGES)
 COMPILED_CERTIFICATIONS: list[tuple[re.Pattern, str]] = _compile_keywords(CERTIFICATIONS)
+
+
+# ---------------------------------------------------------------------------
+# 8. Additional candidate fields (headers + body patterns)
+# ---------------------------------------------------------------------------
+
+# Current company / employer
+CURRENT_COMPANY_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        r"(?:currently|presently)\s+(?:at|with)\s+([A-Z][A-Za-z0-9&.\-']{1,80}?)(?:\s*[.,;]|$|\s+(?:as|since|for))",
+        r"(?:currently|presently)\s+(?:a|an|the)?\s+[A-Z][A-Za-z\s\-]{2,80}?\s+(?:at|with)\s+([A-Z][A-Za-z0-9&.\-']{1,80}?)(?:\s*[.,;]|$|\s+(?:as|since|for))",
+        r"(?:working|employed)\s+(?:at|for|with)\s+([A-Z][A-Za-z0-9&.\-']{1,80}?)(?:\s*[.,;]|$|\s+(?:as|since|for))",
+        r"current\s+(?:employer|company|organisation|organization)\s*[:=]?\s*([A-Z][A-Za-z0-9&.\-']{1,80})",
+        r"my\s+current\s+(?:role|position)\s+is\s+(?:at|with)\s+([A-Z][A-Za-z0-9&.\-']{1,80})",
+    ]
+]
+
+# Current role / title
+CURRENT_ROLE_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        r"(?:currently|presently)\s+(?:a|an|the)\s+([A-Z][A-Za-z\s\-]{2,80}?)(?:\s+at|\s+with|\s*,|\.|$)",
+        r"(?:currently|presently)\s+(?:working\s+as|employed\s+as)?\s+([A-Z][A-Za-z\s\-]{2,80}?)(?:\s+at|\s+with|\s*,|\.|$)",
+        r"(?:working|employed)\s+as\s+(?:a|an)?\s*([A-Z][A-Za-z\s\-]{2,80}?)(?:\s+at|\s+with|\s*,|\.|$)",
+        r"current\s+(?:role|title|position)\s*[:=]?\s*([A-Z][A-Za-z\s\-]{2,80})",
+        r"my\s+(?:current|present)\s+(?:role|title|position)\s+(?:is|:)\s*([A-Z][A-Za-z\s\-]{2,80})",
+    ]
+]
+
+# Visa / work authorization status
+VISA_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        r"\b(H-?1B|H1B|L-?1|L1|O-?1|O1|TN|E-?3|E3|F-?1|F1|J-?1|J1|H-?4|H4|L-?2|L2|OPT|CPT|STEM\s+OPT)\b",
+        r"\b(green\s+card|permanent\s+resident|US\s+citizen|U\.S\.\s*citizen|work\s+authorization|work\s+permit|visa\s+status|right\s+to\s+work)\b",
+        r"\b(require\s+sponsorship|need\s+sponsorship|visa\s+sponsorship|sponsorship\s+required)\b",
+        r"\b(eligible\s+to\s+work|authorized\s+to\s+work|legally\s+authorized)\b",
+    ]
+]
+
+# Relocation willingness
+RELOCATION_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        r"\b(willing\s+to\s+relocate|open\s+to\s+relocation|relocation\s+(?:possible|available|ok|yes)|can\s+relocate|happy\s+to\s+relocate)\b",
+        r"\b(not\s+willing\s+to\s+relocate|cannot\s+relocate|unwilling\s+to\s+relocate|no\s+relocation|relocation\s+not\s+possible)\b",
+        r"relocation\s*[:=]?\s*(yes|no|maybe|negotiable|preferred)",
+    ]
+]
+
+# Travel willingness
+TRAVEL_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        r"\b(willing\s+to\s+travel|open\s+to\s+travel|travel\s+(?:ok|yes|possible|up\s+to))\b",
+        r"\b(not\s+willing\s+to\s+travel|cannot\s+travel|no\s+travel|travel\s+not\s+possible)\b",
+        r"(?:up\s+to|around|about)\s*(\d{1,2})\s*%\s*travel",
+        r"travel\s*[:=]?\s*(\d{1,2})\s*%",
+        r"travel\s*[:=]?\s*(yes|no|minimal|moderate|extensive|negotiable)",
+    ]
+]
+
+# Security clearance
+SECURITY_CLEARANCE_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        r"\b(security\s+clearance|clearance\s+level)\s*[:=]?\s*(top\s+secret|secret|confidential|public\s+trust|TS|SCI|SAP|DV|SC|CTC|NATO\s+secret|NATO\s+cosmic)\b",
+        r"\b(top\s+secret|secret\s+clearance|confidential\s+clearance|public\s+trust\s+clearance|TS\s+clearance|SCI\s+clearance|DV\s+clearance|SC\s+clearance)\b",
+        r"\b(active\s+clearance|current\s+clearance|eligible\s+for\s+clearance)\b",
+    ]
+]
+
+# GPA
+GPA_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        r"\bGPA\s*[:=]?\s*(\d\.\d{1,2}(?:\/\d\.\d{1,2})?)",
+        r"\b(\d\.\d{1,2})\s*(?:\/|out\s+of)\s*4\.0",
+        r"\b(first\s+class\s+honours?|second\s+class\s+upper|second\s+class\s+lower|upper\s+second|lower\s+second|distinction|merit|pass)\b",
+    ]
+]
+
+# Graduation year
+GRADUATION_YEAR_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        r"\b(?:graduat(?:e|ing)|class\s+of|complet(?:e|ing))\s+(?:in\s+)?(20\d{2}|19\d{2})\b",
+        r"\b(20\d{2}|19\d{2})\s+graduat(?:e|ion)\b",
+        r"\bexpected\s+graduation\s*[:=]?\s*(20\d{2}|19\d{2})\b",
+    ]
+]
+
+# References
+REFERENCES_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        r"\breferences?\s+(?:available|upon\s+request|on\s+request|provided\s+upon\s+request)\b",
+        r"\breferences?\s*[:=]\s*(available|upon\s+request|attached|included)\b",
+        r"\b(reference\s+contacts?|professional\s+references?)\s+(?:available|upon\s+request)\b",
+    ]
+]
+
+# Job ID / Reference number
+JOB_ID_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        r"\b(?:job|position|role|req|requisition)\s*(?:id|reference|ref|number|#)\s*[:=#]?\s*([A-Z0-9\-]{3,30})\b",
+        r"\b(?:ref|reference)\s*[:=#]\s*([A-Z0-9\-]{3,30})\b",
+        r"#([A-Z0-9\-]{4,30})\b",
+    ]
+]
+
+# Team / Department
+TEAM_DEPARTMENT_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        r"\b(?:team|department|division|group|unit)\s*[:=]?\s*([A-Z][A-Za-z\s\-]{2,80}?)(?:\s*[.,;]|$)",
+        r"(?:join|joining)\s+(?:the\s+)?([A-Z][A-Za-z\s\-]{2,80}?)\s+(?:team|department|group)",
+    ]
+]
+
+# Hiring manager name
+HIRING_MANAGER_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        r"dear\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\s*,",
+        r"(?:hiring\s+manager|recruiter)\s*[:=]?\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})",
+        r"attn[\.:]\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})",
+    ]
+]
+
+# Email headers we want to extract
+HEADER_FIELDS: list[str] = [
+    "date", "message-id", "in-reply-to", "references", "to", "cc", "reply-to",
+]
 

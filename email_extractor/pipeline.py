@@ -18,8 +18,12 @@ def parse_job_application(email_input: str | dict) -> dict:
         "candidate": {name, email, phone, links, years_of_experience,
                       salary_expectation, notice_period, skills, education,
                       seniority, location, company, start_date, work_type,
-                      languages, certifications},
+                      languages, certifications, current_company, current_role,
+                      visa_status, relocation, travel, security_clearance,
+                      gpa, graduation_year, references, job_id,
+                      team_department, hiring_manager},
         "sender": {name, email},
+        "email_headers": {date, message_id, in_reply_to, references, to, cc, reply_to},
         "attachments": [{filename, mime_type, size, content_id, disposition}],
         "clean_cover_letter": str,
       }
@@ -32,6 +36,11 @@ def parse_job_application(email_input: str | dict) -> dict:
 
     is_app, confidence = classifier.classify(email.subject, email.body)
     clean_body = body_cleaner.clean_cover_letter(email.body)
+
+    # Extract email headers if input was raw RFC-822
+    email_headers = {}
+    if isinstance(email_input, str):
+        email_headers = candidate_extractor.extract_email_headers(email_input)
 
     result = {
         "is_job_application": is_app,
@@ -54,8 +63,21 @@ def parse_job_application(email_input: str | dict) -> dict:
             "work_type": None,
             "languages": [],
             "certifications": [],
+            "current_company": None,
+            "current_role": None,
+            "visa_status": None,
+            "relocation": None,
+            "travel": None,
+            "security_clearance": None,
+            "gpa": None,
+            "graduation_year": None,
+            "references": None,
+            "job_id": None,
+            "team_department": None,
+            "hiring_manager": None,
         },
         "sender": candidate_extractor.extract_sender(email.from_header),
+        "email_headers": email_headers,
         "attachments": email.attachments,
         "clean_cover_letter": clean_body,
     }
