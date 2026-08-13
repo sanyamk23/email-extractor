@@ -1,0 +1,18 @@
+# Core requirements — all optional. The engine runs with zero runtime
+# dependencies using regex-based fallback extraction.
+# Install any combination to enable ML-powered extraction:
+
+# Zero-shot field extraction via GLiNER (BERT-based token classification).
+# NOT an LLM — produces no token generation, zero runtime token costs.
+gliner>=0.2.0
+torch>=2.0
+
+# Dynamic schema discovery: semantic similarity between topic and noun phrases.
+sentence-transformers>=2.2.2
+numpy>=1.24
+
+# Richer HTML-to-text parsing (optional, regex fallback is built-in).
+beautifulsoup4>=4.12
+
+# Post-processing value normalisation.
+python-dateutil>=2.8

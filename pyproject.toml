@@ -3,14 +3,14 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.backends._legacy:_Backend"
 
 [project]
-name = "email-extractor"
+name = "email-extractor-engine"
 version = "1.0.0"
-description = "Rule-based parser that detects job-application emails and extracts candidate metadata."
-readme = "README.md"
+description = "Generic, zero-cost Email Extraction Engine. Zero LLM calls — uses regex + GLiNER with optional sentence-transformers for dynamic schema discovery."
+readme = "email_extractor_engine/README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Data Engineering Team" }]
-keywords = ["email", "information-extraction", "job-application", "nlp", "regex"]
+keywords = ["email", "information-extraction", "nlp", "regex", "gliner", "sentence-transformers", "domain-adaptable", "no-llm", "zero-cost"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3",
@@ -24,13 +24,15 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
-phone = ["phonenumbers>=8.13"]
+ml = ["gliner>=0.2.0", "torch>=2.0", "sentence-transformers>=2.2.2", "numpy>=1.24"]
+html = ["beautifulsoup4>=4.12"]
+full = ["gliner>=0.2.0", "torch>=2.0", "sentence-transformers>=2.2.2", "numpy>=1.24", "beautifulsoup4>=4.12", "python-dateutil>=2.8"]
 
 [project.scripts]
-email-extractor = "email_extractor.cli:main"
+email-extractor = "main:main"
 
 [tool.setuptools.packages.find]
-include = ["email_extractor*"]
+where = ["email_extractor_engine"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["email_extractor_engine/tests"]
